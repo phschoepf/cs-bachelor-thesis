@@ -1,0 +1,31 @@
+- how to integrate integrate muojoco in coppelia
+- focus on door gym for now?!
+- zid VM
+- presentation -> 1st or 2nd week of new semester
+- algos to compare
+- EWC
+- memory activated synapse
+- synapse intelligence
+- our approach: **hypernetworks**
+ 
+ 
+develop environments
+RAL paper? -> learning from demonstration
+next: also RL
+hypernetwork would generate policy network (for RL)
+
+my work: concentrate on hypernetwork for RL similar to https://arxiv.org/pdf/2009.11997.pdf
+change how the hypernetwork works
+
+sayantan will give me sample coppeliasim env
+- set up
+- get familiar with robots
+- RL policy methods
+ - TD3
+ - SAC
+ 
+look into mujoco licensing -> can we publish with it
+get panda robot into door gym
+
+next meeting: prep door envi, demostrate pretrained models
+2022-02-17 11:00
