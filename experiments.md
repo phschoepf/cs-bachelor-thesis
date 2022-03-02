@@ -16,4 +16,4 @@ Notes on experiments, ideas, softwares used.
 # Initial Presentation
 
 - 2022-03-15
-- Presentation: what is CL, video demo of existing doorgym algos, show different handles, (Learning from demostration?)
+- Presentation: what is CL, video demo of existing doorgym algos, show different handles, (Learning from demostration -> just RL)
