@@ -1,0 +1,9 @@
+SAC development:
+
+- DDPG (deep deterministic policy gradient), 2016
+- TD3 (twin delayed DDPG), 2018 -> 2 critic networks
+- SAC -> stochastic, no explicit noise
+
+what are losses in sac training, how long to train
+setup env in iis gpus?
+next: visualize result in mujoco
