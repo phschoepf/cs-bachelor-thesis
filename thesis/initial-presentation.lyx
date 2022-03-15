@@ -509,7 +509,7 @@ literal "false"
 
 \begin_inset Formula 
 \[
-\theta_{s}^{*},\theta_{o}^{*},\theta_{n}^{*}=\text{argmin}_{\hat{\theta}_{s},\hat{\theta}_{o},\hat{\theta}_{n}}(\lambda\boldsymbol{\mathcal{L}_{old}(Y_{o},\hat{Y}_{o})}+\mathcal{L}_{old}(Y_{n},\hat{Y}_{n})+\mathcal{R})
+\theta_{s}^{*},\theta_{o}^{*},\theta_{n}^{*}=\text{argmin}_{\hat{\theta}_{s},\hat{\theta}_{o},\hat{\theta}_{n}}(\lambda\boldsymbol{\mathcal{L}_{old}(Y_{o},\hat{Y}_{o})}+\mathcal{L}_{new}(Y_{n},\hat{Y}_{n})+\mathcal{R})
 \]
 
 \end_inset
