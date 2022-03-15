@@ -5,6 +5,26 @@
 \save_transient_properties true
 \origin unavailable
 \textclass beamer
+\begin_preamble
+\usetheme{madrid}
+\usecolortheme{beaver}
+
+\usepackage{graphicx}
+\usepackage{adjustbox}
+\usepackage[superscript]{cite}
+
+\newenvironment{changemargin}[2]{%
+\begin{list}{}{%
+\setlength{\topsep}{0pt}%
+\setlength{\leftmargin}{#1}%
+\setlength{\rightmargin}{#2}%
+\setlength{\listparindent}{\parindent}%
+\setlength{\itemindent}{\parindent}%
+\setlength{\parsep}{\parskip}%
+}%
+\item[]}{\end{list}}
+\end_preamble
+\options aspectratio=169
 \use_default_options true
 \maintain_unincluded_children false
 \language english
@@ -16,7 +36,7 @@
 \font_typewriter "default" "default"
 \font_math "auto" "auto"
 \font_default_family default
-\use_non_tex_fonts false
+\use_non_tex_fonts true
 \font_sc false
 \font_osf false
 \font_sf_scale 100 100
@@ -30,7 +50,7 @@
 \index_command default
 \float_placement th
 \paperfontsize default
-\spacing single
+\spacing onehalf
 \use_hyperref false
 \papersize default
 \use_geometry true
@@ -84,6 +104,16 @@ Continual Reinforcement Learning
 \end_inset
 
  for Robotic Tasks
+\begin_inset Argument 1
+status open
+
+\begin_layout Plain Layout
+Continual RL for Robotic Tasks
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Subtitle
@@ -92,6 +122,20 @@ Initial Presentaiton
 
 \begin_layout Author
 Philemon Schöpf
+\begin_inset Newline newline
+\end_inset
+
+Supervisors: Antonio Rodriguez Sanchez, Sayantan Auddy
+\begin_inset Argument 1
+status open
+
+\begin_layout Plain Layout
+Philemon Schöpf
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Date
@@ -103,7 +147,41 @@ Philemon Schöpf
 status open
 
 \begin_layout Plain Layout
-Reinforecment Learning
+Reinforcement Learning
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Columns
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+begin{column}{.49
+\backslash
+textwidth}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Block
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+{}
 \end_layout
 
 \end_inset
@@ -113,7 +191,170 @@ Reinforecment Learning
 
 \begin_deeper
 \begin_layout Itemize
-describe what RL is, policy, agent, environment
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+<1->
+\end_layout
+
+\end_inset
+
+Learn by interacting with an environment 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "SuttonRL"
+literal "false"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+<1->
+\end_layout
+
+\end_inset
+
+Find a policy that takes the optimal action for each state (input)
+\end_layout
+
+\begin_layout Itemize
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+<2->
+\end_layout
+
+\end_inset
+
+Ideally suitable to robotics
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+<2->
+\end_layout
+
+\end_inset
+
+No (labeled) training data required
+\end_layout
+
+\begin_layout Itemize
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+<2->
+\end_layout
+
+\end_inset
+
+Physical simulation of environment easier
+\end_layout
+
+\end_deeper
+\end_deeper
+\end_deeper
+\begin_layout Columns
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+end{column}
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+begin{column}{.49
+\backslash
+textwidth}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Columns
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename rl-loop.png
+	lyxscale 60
+	width 90col%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\align center
+RL loop
+\begin_inset CommandInset citation
+LatexCommand cite
+key "SuttonRL"
+literal "false"
+
+\end_inset
+
+
+\begin_inset Formula $^{\text{, p.48}}$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Columns
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+end{column}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Columns
+
 \end_layout
 
 \end_deeper
@@ -142,6 +383,24 @@ Continual Learning
 Learning of multiple tasks in succession
 \end_layout
 
+\begin_layout Itemize
+Adapt existing model with new experiences
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+Model has to retain old information
+\end_layout
+
+\begin_layout Itemize
+Old training data is 
+\series bold
+not accessible
+\series default
+ while training new tasks
+\end_layout
+
+\end_deeper
 \begin_layout Itemize
 Critically important for human intelligence
 \end_layout
@@ -184,12 +443,18 @@ Catastrophic Forgetting
 Old skills are forgotten as network is trained on new data
 \end_layout
 
+\begin_deeper
 \begin_layout Itemize
-Weights are overwritten
+No incentive to keep old skills
 \end_layout
 
+\end_deeper
 \begin_layout Itemize
-Traditional approach: replay of old experiences
+Traditional approach: 
+\emph on
+replay
+\emph default
+ of old training examples to incentivize preserevation
 \end_layout
 
 \begin_deeper
@@ -198,7 +463,15 @@ Keep old training data: storage inefficient, privacy issues
 \end_layout
 
 \begin_layout Itemize
-Scales badly for lifelong learning
+Not scalable to 
+\begin_inset Quotes eld
+\end_inset
+
+lifelong learning
+\begin_inset Quotes erd
+\end_inset
+
+
 \end_layout
 
 \end_deeper
@@ -225,11 +498,289 @@ Previous Work
 
 \begin_deeper
 \begin_layout Itemize
-Elastic Weight Consolidation (EWC)
+Regularization: penalize changes in prediction 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "DBLP:journals/corr/abs-1802-07569"
+literal "false"
+
+\end_inset
+
+
+\begin_inset Formula 
+\[
+\theta_{s}^{*},\theta_{o}^{*},\theta_{n}^{*}=\text{argmin}_{\hat{\theta}_{s},\hat{\theta}_{o},\hat{\theta}_{n}}(\lambda\boldsymbol{\mathcal{L}_{old}(Y_{o},\hat{Y}_{o})}+\mathcal{L}_{old}(Y_{n},\hat{Y}_{n})+\mathcal{R})
+\]
+
+\end_inset
+
+
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+Elastic Weight Consolidation (EWC): penalty according to Fisher information
+ matrix 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "DBLP:journals/corr/abs-1802-07569"
+literal "false"
+
+\end_inset
+
+
+\begin_inset Formula 
+\[
+\mathcal{L}=\mathcal{L}_{0}+\sum_{i}\frac{\lambda}{2}F_{i}(\theta_{i}-\theta_{A,i})^{2}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Itemize
+Dynamic architectures: change/expand network while training 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "DBLP:journals/corr/abs-1802-07569"
+literal "false"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+Hypernetworks: NN that output another NN 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "DBLP:journals/corr/abs-2009-11997"
+literal "false"
+
+\end_inset
+
+
+\end_layout
+
+\end_deeper
+\begin_layout Standard
+\begin_inset Separator plain
+\end_inset
+
+
+\end_layout
+
+\begin_layout Frame
+\begin_inset Argument 4
+status open
+
+\begin_layout Plain Layout
 Hypernetworks
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Columns
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+begin{column}{.55
+\backslash
+textwidth}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Block
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+{}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+<1->
+\end_layout
+
+\end_inset
+
+Hypernetwork generates weights
+\end_layout
+
+\begin_layout Itemize
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+<1->
+\end_layout
+
+\end_inset
+
+Main network generates state-action paris
+\end_layout
+
+\begin_layout Itemize
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+<2->
+\end_layout
+
+\end_inset
+
+Task embeddings and hypernetwork learn via backpropagation
+\end_layout
+
+\begin_layout Itemize
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+<2->
+\end_layout
+
+\end_inset
+
+Separate task identification and solving
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+<2->
+\end_layout
+
+\end_inset
+
+
+\begin_inset Quotes erd
+\end_inset
+
+If–then-else
+\begin_inset Quotes erd
+\end_inset
+
+ as a NN
+\end_layout
+
+\end_deeper
+\end_deeper
+\end_deeper
+\begin_layout Columns
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+end{column}
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+begin{column}{.45
+\backslash
+textwidth}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Columns
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename hypernetwork.png
+	lyxscale 60
+	width 90col%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\align center
+Hypernetwork Architecture for RL
+\begin_inset CommandInset citation
+LatexCommand cite
+key "DBLP:journals/corr/abs-2009-11997,DBLP:journals/corr/abs-1906-00695"
+literal "false"
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Columns
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+end{column}
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \end_deeper
@@ -246,6 +797,25 @@ status open
 
 \begin_layout Plain Layout
 DoorGym
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Columns
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+begin{column}{.5
+\backslash
+textwidth}
 \end_layout
 
 \end_inset
@@ -277,7 +847,82 @@ Pull knob
 
 \end_deeper
 \begin_layout Itemize
-Train RL agent to be able to open all types of doors
+Train agent able to open all 3 kinds of doors
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+One type of door learned at a time
+\end_layout
+
+\end_deeper
+\end_deeper
+\begin_layout Columns
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+end{column}
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+begin{column}{.5
+\backslash
+textwidth}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Columns
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename knobs.png
+	lyxscale 60
+	height 70pheight%
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Columns
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+end{column}
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \end_deeper
@@ -293,7 +938,94 @@ Train RL agent to be able to open all types of doors
 status open
 
 \begin_layout Plain Layout
-Timeline
+DoorGym demo
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Separator plain
+\end_inset
+
+
+\end_layout
+
+\begin_layout Frame
+\begin_inset Argument 4
+status open
+
+\begin_layout Plain Layout
+Goals
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+Use the hypernetwork approach for reinforcement learning
+\end_layout
+
+\begin_layout Itemize
+First: task-incremental CL 
+\begin_inset CommandInset citation
+LatexCommand cite
+key "DBLP:journals/corr/abs-1904-07734"
+literal "false"
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+Type of door is known at inference time
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Expanding: domain- and class-incremental CL
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+Domain-incremental CL: type is unknown
+\end_layout
+
+\begin_layout Itemize
+Class-incremental CL: type is unknown 
+\emph on
+and 
+\emph default
+we want to infer type
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Inference e.g.
+ via object recognition from renders
+\end_layout
+
+\end_deeper
+\begin_layout Standard
+\begin_inset Separator plain
+\end_inset
+
+
+\end_layout
+
+\begin_layout Frame
+\begin_inset Argument 4
+status open
+
+\begin_layout Plain Layout
+Planned Timeline
 \end_layout
 
 \end_inset
@@ -302,7 +1034,65 @@ Timeline
 \end_layout
 
 \begin_layout Frame
-TODO: gantt chart
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+begin{changemargin}{-2cm}{-2cm}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Frame
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename gantt-roadmap.png
+	lyxscale 20
+	width 105text%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Frame
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+end{changemargin}
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -318,6 +1108,24 @@ status open
 
 \begin_layout Plain Layout
 References
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Frame
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+fontsize{6}{7.2}
+\backslash
+selectfont
 \end_layout
 
 \end_inset
