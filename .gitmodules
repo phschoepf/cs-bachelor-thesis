@@ -4,3 +4,6 @@
 [submodule "baselines"]
 	path = baselines
 	url = https://git.uibk.ac.at/csas8782/baselines.git
+[submodule "clfd"]
+	path = clfd
+	url = https://github.com/sayantanauddy/clfd
