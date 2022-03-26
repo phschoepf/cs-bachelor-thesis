@@ -25,14 +25,15 @@ class SplitMNIST(MNIST):
 
 
 def create_split_mnist(root: str, classes: List[int], save=False):
+    IMGSIZE = (28, 28)  # size of images in MNIST
     for is_training, savename in [(True, "training.pt"), (False, "test.pt")]:
         orig_mnist = MNIST(root, train=is_training)
         imgs = orig_mnist.data
         tgts = orig_mnist.targets
 
         mask = sum(tgts == cls for cls in classes)  # make a bool tensor, the sum behaves like an 'or'
-        expanded_mask = mask.view(-1, 1, 1).expand(-1, 28, 28)  # expand the mask to match the 28x28 img shape
-        filtered_imgs = torch.masked_select(imgs, expanded_mask).view(-1, 28, 28)
+        expanded_mask = mask.view(-1, 1, 1).expand(-1, *IMGSIZE)  # expand the mask to a 3D tensor to match img shape
+        filtered_imgs = torch.masked_select(imgs, expanded_mask).view(-1, *IMGSIZE)
         filtered_tgts = torch.masked_select(tgts, mask)
 
         if save:
