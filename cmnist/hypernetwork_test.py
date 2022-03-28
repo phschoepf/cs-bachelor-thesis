@@ -5,6 +5,7 @@ from split_mnist import SplitMNIST
 
 
 def train_task(task_id, hnet, tnet, config):
+    assert task_id in range(0, 5)
     hnet.train()
     tnet.train()
     hnet.gen_new_task_emb()
@@ -34,14 +35,16 @@ def train_task(task_id, hnet, tnet, config):
 
         running_loss = 0.0
         for i, (x, y) in enumerate(DataLoader(SplitMNIST("~/Desktop/schoepf-bachelor-thesis/cmnist/data",
-                                                         classes=[0, 1],
+                                                         classes=[task_id * 2, task_id * 2 + 1],
                                                          transform=lambda img: np.asarray(img, dtype=np.float32).flatten()),
                                               batch_size=16,
                                               shuffle=True)):
 
+            # bring labels to [0,1] range
+            y -= (2*task_id)
             # make a one-hot tensor from the targets
             # 2 classes since we do task-incremental learning (only 2 choices per task and we know that task)
-            # domain
+            # domain/class-incremental learning would get the full 10 output classes
             y = F.one_hot(y, num_classes=2).float().to(tnet.device)
 
             x = x.to(tnet.device)
@@ -99,12 +102,15 @@ def train_task(task_id, hnet, tnet, config):
 def evaluate(task_id, hnet, tnet):
     tnet.set_weights(hnet.forward(task_id))
 
-    split_mnist_test = SplitMNIST("~/Desktop/schoepf-bachelor-thesis/cmnist/data", classes=[0, 1],
+    split_mnist_test = SplitMNIST("~/Desktop/schoepf-bachelor-thesis/cmnist/data",
+                                  classes=[task_id * 2, task_id * 2 + 1],
                                   transform=lambda img: np.asarray(img, dtype=np.float32).flatten(),
                                   train=False)
     correct = 0
     for x, y in DataLoader(split_mnist_test):
         x = x.to(hnet.device)
+        # bring labels to [0,1] range
+        y -= (2 * task_id)
         y = y.to(hnet.device)
         outputs, logits = tnet(x)
         pred = torch.argmax(outputs)
@@ -133,6 +139,14 @@ def init_nets():
     return hnet, tnet
 
 
+def eval_all_tasks(max_tid, hnet, tnet):
+    accuracies = []
+    for tid in range(0, max_tid + 1):
+        accuracies.append(evaluate(tid, hnet, tnet))
+    print(f"mean accuracy on tasks {list(range(0,max_tid+1))}: {sum(accuracies)/len(accuracies):.3f}")
+    return accuracies
+
+
 if __name__ == "__main__":
     # Examples:
     #       python3 cmnist/hypernetwork_test.py train 0
@@ -144,8 +158,10 @@ if __name__ == "__main__":
     hnet, tnet = init_nets()
 
     if sys.argv[1] == "train":
+        # load net learned from previous task
+        hnet = torch.load(f"cmnist/models/hnet{tid-1}.pt")
         train_task(tid, hnet, tnet, config)
-        torch.save(hnet, "cmnist/models/hnet.pt")
+        torch.save(hnet, f"cmnist/models/hnet{tid}.pt")
     elif sys.argv[1] == "eval":
-        hnet = torch.load("cmnist/models/hnet.pt")
-        evaluate(tid, hnet, tnet)
+        hnet = torch.load(f"cmnist/models/hnet{tid}.pt")
+        eval_all_tasks(tid, hnet, tnet)
