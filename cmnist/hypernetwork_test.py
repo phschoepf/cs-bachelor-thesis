@@ -1,29 +1,10 @@
-import numpy as np
 import sys
-
-import torch
-from tqdm import trange
+from tqdm import trange, tqdm
 from clfd.imitation_cl.model.hypernetwork import *
 from split_mnist import SplitMNIST
 
-if __name__ == "__main__":
-    task_id: int = sys.argv[1] if len(sys.argv) > 1 else 0
-    config = {"beta": 5e-3,
-              "lr": 1e-4,
-              }
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    hnet = HyperNetwork(layers=[2048, 512, 128],
-                        te_dim=5,
-                        target_shapes=TargetNetwork.weight_shapes(n_in=28 * 28, n_out=10, hidden_layers=[512, 64]),
-                        device=device).to(device)
 
-    tnet = TargetNetwork(n_in=28 * 28,
-                         n_out=10,
-                         hidden_layers=[512, 64],
-                         no_weights=True,
-                         bn_track_stats=False,
-                         device=device).to(device)
-
+def train_task(task_id, hnet, tnet, config):
     hnet.train()
     tnet.train()
     hnet.gen_new_task_emb()
@@ -47,7 +28,7 @@ if __name__ == "__main__":
     # Whether the regularizer will be computed during training?
     calc_reg = task_id > 0 and config["beta"] > 0
 
-    criterion = torch.nn.MSELoss()
+    criterion = torch.nn.BCEWithLogitsLoss()
     # Start training iterations
     for epoch in trange(5):
 
@@ -59,9 +40,11 @@ if __name__ == "__main__":
                                               shuffle=True)):
 
             # make a one-hot tensor from the targets
-            y = torch.nn.functional.one_hot(y, num_classes=10).float().to(device)
+            # 2 classes since we do task-incremental learning (only 2 choices per task and we know that task)
+            # domain
+            y = F.one_hot(y, num_classes=2).float().to(tnet.device)
 
-            x = x.to(device)
+            x = x.to(tnet.device)
             ### Train theta and task embedding
             theta_optimizer.zero_grad()
             emb_optimizer.zero_grad()
@@ -71,15 +54,15 @@ if __name__ == "__main__":
             tnet.set_weights(weights)
 
             # forward + backward + optimize
-            outputs = tnet(x)
-            loss = criterion(outputs, y)
+            outputs, logits = tnet(x)
+            loss = criterion(logits, y)
             loss.backward(retain_graph=calc_reg, create_graph=False)
             emb_optimizer.step()
 
             # print statistics
             running_loss += loss.item()
-            if i % 100 == 0:  # print every 2000 mini-batches
-                print(f'[{epoch}, {i + 1:5d}] loss: {running_loss / 100:.3f}')
+            if i % 100 == 99:  # print every 2000 mini-batches
+                tqdm.write(f'[{epoch}, {i + 1:3d}] loss: {running_loss / 100:.1e}')
                 running_loss = 0.0
 
             # Initialize the regularization loss
@@ -112,4 +95,57 @@ if __name__ == "__main__":
             # Update the hnet params using the current task loss and the regularization loss
             theta_optimizer.step()
 
-    torch.save(hnet, "hnet.pt")
+
+def evaluate(task_id, hnet, tnet):
+    tnet.set_weights(hnet.forward(task_id))
+
+    split_mnist_test = SplitMNIST("~/Desktop/schoepf-bachelor-thesis/cmnist/data", classes=[0, 1],
+                                  transform=lambda img: np.asarray(img, dtype=np.float32).flatten(),
+                                  train=False)
+    correct = 0
+    for x, y in DataLoader(split_mnist_test):
+        x = x.to(hnet.device)
+        y = y.to(hnet.device)
+        outputs, logits = tnet(x)
+        pred = torch.argmax(outputs)
+        if pred == y.long():
+            correct = correct + 1
+    print(f"accuracy: {correct / split_mnist_test.__len__():.3f}")
+    return correct / split_mnist_test.__len__()
+
+
+def init_nets():
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    hnet = HyperNetwork(layers=[2048, 512, 128],
+                        te_dim=5,
+                        target_shapes=TargetNetwork.weight_shapes(n_in=28 * 28, n_out=2, hidden_layers=[128, 64]),
+                        device=device).to(device)
+
+    tnet = TargetNetwork(n_in=28 * 28,
+                         n_out=2,
+                         hidden_layers=[128, 64],
+                         no_weights=True,
+                         bn_track_stats=False,
+                         activation_fn=torch.nn.ReLU(),
+                         out_fn=torch.nn.Sigmoid(),
+                         device=device).to(device)
+
+    return hnet, tnet
+
+
+if __name__ == "__main__":
+    # Examples:
+    #       python3 cmnist/hypernetwork_test.py train 0
+    #       python3 cmnist/hypernetwork_test.py eval 0
+    tid = int(sys.argv[2]) if len(sys.argv) > 1 else 0
+    config = {"beta": 5e-3,
+              "lr": 1e-4,
+              }
+    hnet, tnet = init_nets()
+
+    if sys.argv[1] == "train":
+        train_task(tid, hnet, tnet, config)
+        torch.save(hnet, "cmnist/models/hnet.pt")
+    elif sys.argv[1] == "eval":
+        hnet = torch.load("cmnist/models/hnet.pt")
+        evaluate(tid, hnet, tnet)
