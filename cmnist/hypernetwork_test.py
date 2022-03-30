@@ -1,4 +1,5 @@
 import sys
+from torchvision.datasets import MNIST
 from tqdm import trange, tqdm
 from clfd.imitation_cl.model.hypernetwork import *
 from split_mnist import SplitMNIST
@@ -36,12 +37,13 @@ def train_task(task_id, hnet, tnet, config):
         running_loss = 0.0
         for i, (x, y) in enumerate(DataLoader(SplitMNIST("~/Desktop/schoepf-bachelor-thesis/cmnist/data",
                                                          classes=[task_id * 2, task_id * 2 + 1],
-                                                         transform=lambda img: np.asarray(img, dtype=np.float32).flatten()),
+                                                         transform=lambda img: np.asarray(img,
+                                                                                          dtype=np.float32).flatten()),
                                               batch_size=16,
                                               shuffle=True)):
 
             # bring labels to [0,1] range
-            y -= (2*task_id)
+            y = y % 2
             # make a one-hot tensor from the targets
             # 2 classes since we do task-incremental learning (only 2 choices per task and we know that task)
             # domain/class-incremental learning would get the full 10 output classes
@@ -99,25 +101,81 @@ def train_task(task_id, hnet, tnet, config):
             theta_optimizer.step()
 
 
-def evaluate(task_id, hnet, tnet):
-    tnet.set_weights(hnet.forward(task_id))
+def evaluate(hnet, tnet, scenario: str, task_id=None):
+    """
+    Evaluate trained hypernetwork.
 
-    split_mnist_test = SplitMNIST("~/Desktop/schoepf-bachelor-thesis/cmnist/data",
-                                  classes=[task_id * 2, task_id * 2 + 1],
-                                  transform=lambda img: np.asarray(img, dtype=np.float32).flatten(),
-                                  train=False)
+    Args:
+        task_id: Id of the task to evaluate. Only needed for scenario="task"
+        hnet: hypernetwork with loaded weights
+        tnet: Empty target network (needs correct layer sizes)
+        scenario: CL scenario to evaluate, can be "task", "domain", "class"
+
+    Returns:
+        accuracy on test set
+        """
+    if scenario == "task":
+        assert task_id is not None, f'Scenario "task" needs task id'
+        tnet.set_weights(hnet.forward(task_id))
+        # use split MNIST for the given task
+        testset = SplitMNIST("~/Desktop/schoepf-bachelor-thesis/cmnist/data",
+                             classes=[task_id * 2, task_id * 2 + 1],
+                             transform=lambda img: np.asarray(img, dtype=np.float32).flatten(),
+                             train=False)
+    elif scenario in ["domain", "class"]:
+        # use full MNIST in these scenarios
+        testset = MNIST("~/Desktop/schoepf-bachelor-thesis/cmnist/data",
+                        transform=lambda img: np.asarray(img, dtype=np.float32).flatten(),
+                        train=False)
+    else:
+        raise ValueError(f"Unknown scenario {scenario}")
+
     correct = 0
-    for x, y in DataLoader(split_mnist_test):
+    for x, y in tqdm(DataLoader(testset)):
         x = x.to(hnet.device)
         # bring labels to [0,1] range
-        y -= (2 * task_id)
+        y = y % 2
         y = y.to(hnet.device)
+
+        if scenario in ["domain", "class"]:
+            task_id, _ = infer_task(x, hnet, tnet, max_task_id=4)
+            tnet.set_weights(hnet.forward(task_id))
+
         outputs, logits = tnet(x)
         pred = torch.argmax(outputs)
+
+        if scenario == "class":
+            # convert predictions back to full MNIST class space based on inferred task
+            pred = pred + 2 * task_id
+
         if pred == y.long():
             correct = correct + 1
-    print(f"accuracy: {correct / split_mnist_test.__len__():.3f}")
-    return correct / split_mnist_test.__len__()
+    print(f"accuracy: {correct / testset.__len__():.3f}")
+    return correct / testset.__len__()
+
+
+def infer_task(X, hnet, tnet, max_task_id):
+    """
+    Infer task from input data using the entropy of the output labels. We choose the task embedding that produces the
+    lowest-entropy (i.e. highest confidence) output.
+    Args:
+        X: Training data
+        hnet:
+        tnet:
+        max_task_id: Number of tasks to try
+
+    Returns: Tuple of (task_id, entropy) for the minimum entropy task
+    """
+    min_entropy = (None, 1.0)
+    for tid in range(max_task_id):
+        tnet.set_weights(hnet.forward(tid))
+        outputs, logits = tnet(X)
+        normalized = outputs.transpose(0, 1).div(outputs.sum(dim=-1) + 1e-12).transpose(1, 0)  # dimension hack
+        entropy = - (normalized * (normalized + 1e-12).log2()).sum(dim=-1)  # Shannon entropy
+        if entropy < min_entropy[1]:
+            min_entropy = (tid, entropy.tolist())
+    # print(f"inferred task {min_entropy[0]} with entropy {min_entropy[1]:.2e}")
+    return min_entropy
 
 
 def init_nets():
@@ -139,12 +197,22 @@ def init_nets():
     return hnet, tnet
 
 
-def eval_all_tasks(max_tid, hnet, tnet):
+def eval_task_cl(max_tid, hnet, tnet):
     accuracies = []
     for tid in range(0, max_tid + 1):
-        accuracies.append(evaluate(tid, hnet, tnet))
-    print(f"mean accuracy on tasks {list(range(0,max_tid+1))}: {sum(accuracies)/len(accuracies):.3f}")
+        accuracies.append(evaluate(hnet, tnet, scenario="task", task_id=tid))
+    print(f"mean accuracy on tasks {list(range(0, max_tid + 1))}: {sum(accuracies) / len(accuracies):.3f}")
     return accuracies
+
+
+def eval_domain_cl(hnet, tnet):
+    accuracy = evaluate(hnet, tnet, scenario="domain")
+    print(f"accuracy on domains: {accuracy:.3f}")
+
+
+def eval_class_cl(hnet, tnet):
+    accuracy = evaluate(hnet, tnet, scenario="class")
+    print(f"accuracy on classes: {accuracy:.3f}")
 
 
 if __name__ == "__main__":
@@ -164,4 +232,6 @@ if __name__ == "__main__":
         torch.save(hnet, f"cmnist/models/hnet{tid}.pt")
     elif sys.argv[1] == "eval":
         hnet = torch.load(f"cmnist/models/hnet{tid}.pt")
-        eval_all_tasks(tid, hnet, tnet)
+        eval_task_cl(tid, hnet, tnet)
+        eval_domain_cl(hnet, tnet)
+        eval_class_cl(hnet, tnet)
