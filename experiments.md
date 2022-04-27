@@ -27,7 +27,7 @@ Also, we're not sure if the evaluation properly used task IDs or always evaluate
 
 Evaluate:
 
-   python3 enjoy.py --env-name doorenv-v0 --load-name trained_models/hnppo/doorenv-v0_ppo-hn2-task2.160.pt --world-path /home/philemon/Desktop/schoepf-bachelor-thesis/DoorGym/world_generator/world/{lever,pull,round}_blue_floatinghook --render --task-id {0,1,2,3}
+    python3 enjoy.py --env-name doorenv-v0 --load-name trained_models/hnppo/doorenv-v0_ppo-hn2-task2.160.pt --world-path /home/philemon/Desktop/schoepf-bachelor-thesis/DoorGym/world_generator/world/{lever,pull,round}_blue_floatinghook --render --task-id {0,1,2,3}
    
 ### ppo-hn3
 
@@ -37,6 +37,33 @@ Training order: pull -> lever -> round
     python3 main.py --env-name doorenv-v0 --algo hnppo --save-name ppo-hn3-task0pull --world-path /home/philemon/Desktop/schoepf-bachelor-thesis/DoorGym/world_generator/world/pull_blue_floatinghook/ --task-id=0
     python3 main.py --env-name doorenv-v0 --algo hnppo --save-name ppo-hn3-task1lever --world-path /home/philemon/Desktop/schoepf-bachelor-thesis/DoorGym/world_generator/world/lever_blue_floatinghook/ --pretrained-policy-load trained_models/hnppo/doorenv-v0_ppo-hn3-task0pull.140.pt --task-id=1
     python3 main.py --env-name doorenv-v0 --algo hnppo --save-name ppo-hn3-task2round --world-path /home/philemon/Desktop/schoepf-bachelor-thesis/DoorGym/world_generator/world/round_blue_floatinghook/ --pretrained-policy-load trained_models/hnppo/doorenv-v0_ppo-hn3-task1lever.120.pt --task-id=2
+
+### ppo-hn4
+
+Implemented dist weight setting by hnet (new FunctionalDiagGaussian class). Dist_entropy no longer constant (as it should be).  
+New save folder structure (also adapted old HNPPO saves to it).
+
+    python3 main.py --env-name doorenv-v0 --algo hnppo --save-name ppo-hn4-task0-pull --world-path /home/philemon/Desktop/schoepf-bachelor-thesis/DoorGym/world_generator/world/pull_blue_floatinghook/ --task-id=0
+    python3 main.py --env-name doorenv-v0 --algo hnppo --save-name ppo-hn4-task1-lever --world-path ~/Desktop/schoepf-bachelor-thesis/DoorGym/world_generator/world/lever_blue_floatinghook/ --pretrained-policy-load trained_models/hnppo/doorenv-v0_ppo-hn4-task0-pull/ppo-hn4-task0-pull.130.pt --task-id=1
+
+Deterministic policy was also tried here in the 2nd task:
+
+    python3 main.py --env-name doorenv-v0 --algo hnppo --save-name ppo-hn4-task1-lever-deterministc --world-path ~/Desktop/schoepf-bachelor-thesis/DoorGym/world_generator/world/lever_blue_floatinghook/ --pretrained-policy-load trained_models/hnppo/doorenv-v0_ppo-hn4-task0-pull/ppo-hn4-task0-pull.130.pt --task-id=1 
+
+(failed, did not learn anything, loss exploded)
+
+### ppo-chn1
+
+Trying out chunked hypernetworks
+
+    python3 main.py --env-name doorenv-v0 --algo chnppo --save-name ppo-chn1-task0-pull --world-path ~/Desktop/schoepf-bachelor-thesis/DoorGym/world_generator/world/pull_blue_floatinghook/ --task-id=0
+    python3 main.py --env-name doorenv-v0 --algo chnppo --save-name ppo-chn1-task1-lever --world-path ~/Desktop/schoepf-bachelor-thesis/DoorGym/world_generator/world/lever_blue_floatinghook/ --pretrained-policy-load trained_models/chnppo/doorenv-v0_ppo-chn1-task0-pull/ppo-chn1-task0-pull.355.pt --task-id=1
+
+### ppo-hn5
+
+Testing with `b1-gripper` robot instead of `b1-floatinghook`
+
+    python3 main.py --env-name doorenv-v0 --algo hnppo --save-name ppo-hn5-task0-pull --world-path ~/Desktop/schoepf-bachelor-thesis/DoorGym/world_generator/world/pull_blue_gripper/ --task-id=0
 
 # Ideas & next steps
 
