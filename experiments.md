@@ -79,13 +79,23 @@ Observation: just hits door and opens it since there is no latch. Trying with mo
 
 No opening, only manages to push down lever. 
 
-### pph-hn5 (new bot)
+### ppo-hn5 (new bot)
 
 DoorGym rev `a3866ae62c38ff8d08b3ff5b6f2ea82d8e73cd22`  
 Changed robot to start with arm down so it does not collide with doorframe and get kicked off wildly
 
     python3 main.py --env-name doorenv-v0 --algo hnppo --save-name ppo-hn5-task0-pull --world-path ~/Desktop/schoepf-bachelor-thesis/DoorGym/world_generator/world/pull_blue_gripper/ --task-id=0
     python3 main.py --env-name doorenv-v0 --algo hnppo --save-name ppo-hn5-task1-lever --world-path ~/Desktop/schoepf-bachelor-thesis/DoorGym/world_generator/world/lever_blue_gripper/ --pretrained-policy-load trained_models/hnppo/doorenv-v0_ppo-hn5-task0-pull/ppo-hn5-task0-pull.200.pt --task-id=1
+    python3 main.py --env-name doorenv-v0 --algo hnppo --save-name ppo-hn5-task2-round --world-path ~/Desktop/schoepf-bachelor-thesis/DoorGym/world_generator/world/round_blue_gripper/ --pretrained-policy-load trained_models/hnppo/doorenv-v0_ppo-hn5-task1-lever/ppo-hn5-task1-lever.180.pt --task-id=2
+
+### ppo-hn6
+
+DoorGym rev `a273261ebad327ebf2978cd89d526815243f93af`  
+Critic is no longer part of the hnet, just actor is. Critic gets reset for each training dataset. Fixed a bug where theta optimizer was called 2x per step  
+Fixed some parameters in the optimizers
+
+    python3 main.py --env-name doorenv-v0 --algo hnppo --num-processes 12 --save-name ppo-hn6-task0-pull --world-path ~/Desktop/schoepf-bachelor-thesis/DoorGym/world_generator/world/pull_blue_gripper/ --task-id=0
+
 
 
 # Ideas & next steps
