@@ -138,9 +138,26 @@ No learning at all with the round task. Trying the easier lever_left task.
 
      python3 main.py --env-name doorenv-v0 --algo hnppo --num-processes 12 --save-name ppo-hn9-task3-lever_left --world-path ~/Desktop/schoepf-bachelor-thesis/DoorGym/world_generator/world/lever_blue_floatinggripper_left/ --pretrained-policy-load trained_models/hnppo/doorenv-v0_ppo-hn9-task2-lever/ppo-hn9-task2-lever.185.pt --task-id=3
 
-# Ideas & next steps
+### ppo-h10
+DoorGym rev `3f9bc27b8d9aa9f91214ff9cce05c09c5ea4d708`
+Fresh critic is back. Using very small max_grad_norm to prevent explosion of the distribution std.  
+From here on, logging hparams in tensorboard for tracability.
 
-- Robomimic repo?
+    python3 main.py --env-name doorenv-v0 --algo hnppo --num-processes 12 --save-name ppo-hn10-task0-pull --world-path ~/Desktop/schoepf-bachelor-thesis/DoorGym/world_generator/world/pull_blue_floatinggripper --task-id 0 --lr 5e-3 --clip-param 0.3 --max-grad-norm 1e-4
+    python3 main.py --env-name doorenv-v0 --algo hnppo --num-processes 12 --save-name ppo-hn10-task1-lever --world-path ~/Desktop/schoepf-bachelor-thesis/DoorGym/world_generator/world/lever_blue_floatinggripper --task-id 1 --lr 5e-3 --clip-param 0.3 --max-grad-norm 1e-4 --pretrained-policy-load trained_models/hnppo/doorenv-v0_ppo-hn10-task0-pull/ppo-hn10-task0-pull.120.pt 
+
+Train the lever task from scratch to compare the impact of CL regularization:
+
+    python3 main.py --env-name doorenv-v0 --algo hnppo --num-processes 12 --save-name ppo-hn10-task0-lever --world-path ~/Desktop/schoepf-bachelor-thesis/DoorGym/world_generator/world/lever_blue_floatinggripper --task-id 0 --lr 5e-3 --clip-param 0.3 --max-grad-norm 1e-4
+
+#### Results
+
+* pull task got a glitchy but reliable policy (hitting the door on the side to make it open)
+* lever task does not open, but gets close (pushing down on handle)
+* Reward curve looks similar for non-CL and CL-regularized runs -> regularization does not seem to hinder learning too much
+  * Embeddings are *finally* optimizing correctly for each task
+  * Old pull task is still working after 325 iterations of new training
+* max-grad-norm of 1e-3 also seems to still work on pretrained model. Have to try on fresh one as well. 1e-2 explodes to infinity on first epoch
 
 # Initial Presentation
 
