@@ -145,6 +145,9 @@ From here on, logging hparams in tensorboard for tracability.
 
     python3 main.py --env-name doorenv-v0 --algo hnppo --num-processes 12 --save-name ppo-hn10-task0-pull --world-path ~/Desktop/schoepf-bachelor-thesis/DoorGym/world_generator/world/pull_blue_floatinggripper --task-id 0 --lr 5e-3 --clip-param 0.3 --max-grad-norm 1e-4
     python3 main.py --env-name doorenv-v0 --algo hnppo --num-processes 12 --save-name ppo-hn10-task1-lever --world-path ~/Desktop/schoepf-bachelor-thesis/DoorGym/world_generator/world/lever_blue_floatinggripper --task-id 1 --lr 5e-3 --clip-param 0.3 --max-grad-norm 1e-4 --pretrained-policy-load trained_models/hnppo/doorenv-v0_ppo-hn10-task0-pull/ppo-hn10-task0-pull.120.pt 
+    python3 main.py --env-name doorenv-v0 --algo hnppo --num-processes 12 --save-name ppo-hn10-task2-round --world-path ~/Desktop/schoepf-bachelor-thesis/DoorGym/world_generator/world/round_blue_floatinggripper --task-id 2 --lr 5e-3 --clip-param 0.3 --max-grad-norm 1e-4 --pretrained-policy-load trained_models/hnppo/doorenv-v0_ppo-hn10-task1-lever/ppo-hn10-task1-lever.355.pt
+    python3 main.py --env-name doorenv-v0 --algo hnppo --num-processes 12 --save-name ppo-hn10-task3-pull_left --world-path ~/Desktop/schoepf-bachelor-thesis/DoorGym/world_generator/world/pull_blue_floatinggripper_left --task-id 3 --lr 5e-3 --clip-param 0.3 --max-grad-norm 1e-4 --pretrained-policy-load trained_models/hnppo/doorenv-v0_ppo-hn10-task1-lever/ppo-hn10-task2-round.400.pt
+    python3 main.py --env-name doorenv-v0 --algo hnppo --num-processes 12 --save-name ppo-hn10-task4_lever_left --world-path ~/Desktop/schoepf-bachelor-thesis/DoorGym/world_generator/world/lever_blue_floatinggripper_left --task-id 4 --lr 5e-3 --clip-param 0.3 --max-grad-norm 1e-4 --pretrained-policy-load trained_models/hnppo/doorenv-v0_ppo-hn10-task1-lever/ppo-hn10-task3-pull_left.160.pt
 
 Train the lever task from scratch to compare the impact of CL regularization:
 
@@ -158,6 +161,7 @@ Train the lever task from scratch to compare the impact of CL regularization:
   * Embeddings are *finally* optimizing correctly for each task
   * Old pull task is still working after 325 iterations of new training
 * max-grad-norm of 1e-3 also seems to still work on pretrained model. Have to try on fresh one as well. 1e-2 explodes to infinity on first epoch
+* Great CL performance, ever after 5 tasks the manners in which previous tasks are solved stay very consistent
 
 # Initial Presentation
 
