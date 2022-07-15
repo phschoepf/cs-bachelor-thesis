@@ -153,6 +153,9 @@ Train the lever task from scratch to compare the impact of CL regularization:
 
     python3 main.py --env-name doorenv-v0 --algo hnppo --num-processes 12 --save-name ppo-hn10-task0-lever --world-path ~/Desktop/schoepf-bachelor-thesis/DoorGym/world_generator/world/lever_blue_floatinggripper --task-id 0 --lr 5e-3 --clip-param 0.3 --max-grad-norm 1e-4
 
+
+Also trained the tasks individually on a fresh hypernetwork to compare CL performance.
+
 #### Results
 
 * pull task got a glitchy but reliable policy (hitting the door on the side to make it open)
@@ -162,6 +165,23 @@ Train the lever task from scratch to compare the impact of CL regularization:
   * Old pull task is still working after 325 iterations of new training
 * max-grad-norm of 1e-3 also seems to still work on pretrained model. Have to try on fresh one as well. 1e-2 explodes to infinity on first epoch
 * Great CL performance, ever after 5 tasks the manners in which previous tasks are solved stay very consistent
+
+### ppo-hn11
+DoorGym rev `751e7479928168e479637518e72cd67176bba8f9`
+Some changes to environment
+
+* Reduced spring and damping strength for doorknobs ("easy mode") to avoid limitations by maximal gripper strength
+* Moved handles further to door center in pull_left worlds (`pull_left_fixed`) to avoid the base plate sticking out into the doorframe, causing physics glitches
+* Logging rollout values and rewards from now on
+
+* `hn11-task0-pull_left_fixed` has clip-param of 0.5 (tried it out, generated a lot of training noise)
+* `hn11-task0-pull_left_fixed_2` back to clip-param of 0.3
+
+### ppo-base11
+DoorGym rev `70d9a2e6c2578984dfcfee118cada059ed49fa40`
+Vanilla PPO baseline. Runs on same codebase as the hypernetwork algo. All params are default as in DoorGym.
+
+     python3 main.py --env-name doorenv-v0 --algo ppo --num-processes 12 --save-name ppo-base11-task0-pull --world-path ~/Desktop/schoepf-bachelor-thesis/DoorGym/world_generator/world/pull_blue_floatinggripper 
 
 # Initial Presentation
 
