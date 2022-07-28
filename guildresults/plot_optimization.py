@@ -13,14 +13,26 @@ parser.add_argument('file', type=str)
 args = parser.parse_args()
 
 results = pd.read_csv(args.file)
-results = results[(results['Episode_rewards'] > -1e4)]  # remove runs with extremely low rewards
+successful = results[(results['status'] != 'error') & (results['Episode_rewards'] >= -1e4)]  # promising trials
+bad = results[(results['status'] != 'error') & (results['Episode_rewards'] < -1e4)]  # reward exploded into negative
+error = results[results['status'] == 'error']  # not completed trials, usually due to grad explosion
+
+bad['Episode_rewards'].clip(lower=-1e4, inplace=True)
 
 fig = plt.figure()
 ax = Axes3D(fig, auto_add_to_figure=False)
-ax.scatter(results['lr'].apply(math.log10),
-           results['clip-param'],
-           results['Episode_rewards'],
-           alpha=1, cmap='jet', c=results['Episode_rewards'])
+
+
+def _scatter(ax, data, **kwargs):
+    ax.scatter(data['lr'].apply(math.log10),
+               data['clip-param'],
+               data['Episode_rewards'],
+               **kwargs)
+
+
+_scatter(ax, successful, alpha=1, cmap='jet', c=successful['Episode_rewards'])
+_scatter(ax, bad, alpha=0.2, c='black')
+_scatter(ax, error, marker='x')
 ax.ticklabel_format(style='sci', scilimits=(0, 0))
 
 fig.suptitle(os.path.splitext(os.path.basename(args.file))[0])

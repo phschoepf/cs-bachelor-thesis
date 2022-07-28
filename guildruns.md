@@ -49,3 +49,6 @@ Params to optimize: `lr, network-size, clip-param`. Optimizing for **vanilla PPO
 |----------------------------|----------|---------|----------------------------------------------------------------------------------------------------------------------|
 | lr_size_clip_opt_ppo       | ce5370cc | gpu3    | best (cluster): lr=0.0027, clip=0.48, net=[64,64]. also good (single point): lr=0.004, clip=0.20, net=[64, 64]       |
 | lr_size_clip_opt_ppo_lever | 8452dd9b | gpu1    | best (single point): lr=0.0006, clip=0.49, net=[64,64]. cluster of good values at: lr=0.003, clip=0.33, net=[64, 64] |
+| lr_size_clip_opt_ppo_round | 5a75bff6 | gpu3    | best (cluster): lr=1.0e-4, clip=0.597, net=[64,64,64]. Everything above lr=0.005 becomes abysmal or errors out.      |
+
+No opening on lever or round, even after optimization. 
