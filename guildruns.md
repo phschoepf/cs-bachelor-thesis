@@ -16,7 +16,7 @@ c703i overview:
 | 8   | RTX 3090    |                                                                          |
 | 9   | RTX 3090    | throws CUBLAS_STATUS_EXECUTION_FAILED when calling `cublasSgemm(handle)` |
 
-## lr Optimization
+## lr Optimization (hnppo)
 
 1st round: Without determinism, 4 learning rates `[ 1e-4, 1e-3, 5e-3, 1e-2 ]`  
 General observation: lr > 1e-3 is better, should focus on 1e-3...1e-2 range
@@ -41,7 +41,7 @@ Fixed problem by passing already chosen worlds into `env.make()`. Can now run de
 | determinism_test_singlethread | ad89f543 | gpu5    | **deterministic**                                   |
 | determinism_test              | bd420e38 | gpu1    | fix: choose worlds before fork, **determinisitc**   |
 
-## Bayesian optimization with multiple parameters
+## Bayesian optimization with multiple parameters (ppo)
 
 Params to optimize: `lr, network-size, clip-param`. Optimizing for **vanilla PPO** first.
 
@@ -52,3 +52,10 @@ Params to optimize: `lr, network-size, clip-param`. Optimizing for **vanilla PPO
 | lr_size_clip_opt_ppo_round | 5a75bff6 | gpu3    | best (cluster): lr=1.0e-4, clip=0.597, net=[64,64,64]. Everything above lr=0.005 becomes abysmal or errors out.      |
 
 No opening on lever or round, even after optimization. 
+
+### Long runs with optimized parameters
+
+| Name           | batch id | machine | result                                     |
+|----------------|----------|---------|--------------------------------------------|
+| ppo_lever_long | 6aa2b881 | gpu6    | no opening, but rather high reward (7696)  |
+| ppo_round_long | 4eb3f464 | gpu5    | no opening, reward stagnant after 1M steps |
