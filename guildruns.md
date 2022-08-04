@@ -59,3 +59,24 @@ No opening on lever or round, even after optimization.
 |----------------|----------|---------|--------------------------------------------|
 | ppo_lever_long | 6aa2b881 | gpu6    | no opening, but rather high reward (7696)  |
 | ppo_round_long | 4eb3f464 | gpu5    | no opening, reward stagnant after 1M steps |
+
+
+## Bayesian optimization with multiple parameters (hnppo)
+
+Same optimization as done for vanilla ppo, now for the fresh hypernetwork (task 0, no CL)
+
+| Name                         | batch id | machine | result                                                                                                                                                        |
+|------------------------------|----------|---------|---------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| lr_size_clip_opt_hnppo_lever | 45d2abfc | gpu1    | best: lr=0.0074, clip=0.41, net=[64 64 64]. lr definitely has largest impact, good results around 0.007-0.013                                                 |
+| lr_size_clip_opt_hnppo_round | 20028a8e | gpu6    | best: lr=0.019851, clip=0.215917, net=[64 64 64]. All good runs are at the high-limit of the lr search space (0.02) and low-limit of the clipping space (0.2) |
+
+General observation: Much fewer runs end in error, maybe due to lower (1e-4) max-grad-norm. Also, the network size does not seem to have much impact.
+
+## Testing with hook robot
+
+The floatinghook was previously able to open lever doors occasionally - try again with the optimized hparams, both hnppo and vanilla ppo.
+
+| Name                      | batch id | machine | result                                                                                                          |
+|---------------------------|----------|---------|-----------------------------------------------------------------------------------------------------------------|
+| hooktest_lever            | a5858514 | gpu1    | task 0 HNPPO: on the right track to solving task, does find lever and push down on it                           |
+| hooktest_lever_ppo_latest | c6499a0f | gpu3    | hparams from latest doorgym paper. **PPO can completely solve the task** with 90% success rate after 12M steps. |
