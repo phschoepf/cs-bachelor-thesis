@@ -19,14 +19,14 @@ error = results[results['status'] == 'error']  # not completed trials, usually d
 
 bad['Episode_rewards'].clip(lower=-1e4, inplace=True)
 
-fig = plt.figure()
-ax = Axes3D(fig, auto_add_to_figure=False)
+fig, ax = plt.subplots()
+# ax = Axes3D(fig, auto_add_to_figure=False)
 
 
 def _scatter(ax, data, **kwargs):
     ax.scatter(data['lr'].apply(math.log10),
                data['clip-param'],
-               data['Episode_rewards'],
+               # data['Episode_rewards'],
                **kwargs)
 
 
@@ -38,7 +38,7 @@ ax.ticklabel_format(style='sci', scilimits=(0, 0))
 fig.suptitle(os.path.splitext(os.path.basename(args.file))[0])
 ax.set_xlabel('log(lr)')
 ax.set_ylabel('clip-param')
-ax.set_zlabel('Episode rewards')
+# ax.set_zlabel('Episode rewards')
 
 fig.add_axes(ax)
 
