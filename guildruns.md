@@ -65,14 +65,16 @@ No opening on lever or round, even after optimization.
 
 Same optimization as done for vanilla ppo, now for the fresh hypernetwork (task 0, no CL)
 
-| Name                         | batch id | machine | result                                                                                                                                                        |
-|------------------------------|----------|---------|---------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| lr_size_clip_opt_hnppo_lever | 45d2abfc | gpu1    | best: lr=0.0074, clip=0.41, net=[64 64 64]. lr definitely has largest impact, good results around 0.007-0.013                                                 |
-| lr_size_clip_opt_hnppo_round | 20028a8e | gpu6    | best: lr=0.019851, clip=0.215917, net=[64 64 64]. All good runs are at the high-limit of the lr search space (0.02) and low-limit of the clipping space (0.2) |
+| Name                                 | batch id | machine | result                                                                                                                                                                   |
+|--------------------------------------|----------|---------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| lr_size_clip_opt_hnppo_lever         | 45d2abfc | gpu1    | best: lr=0.0074, clip=0.41, net=[64 64 64]. lr definitely has largest impact, good results around 0.007-0.013                                                            |
+| lr_size_clip_opt_hnppo_round         | 20028a8e | gpu6    | best: lr=0.019851, clip=0.215917, net=[64 64 64]. All good runs are at the high-limit of the lr search space (0.02) and low-limit of the clipping space (0.2)            |
+| lr_size_clip_entropy_opt_hnppo_lever | 8acaee00 | gpu3    | Larger size and depth do not bring advantage, high te-dim, lr=0.005-0.02, clip=0.3-0.4, entropy>1e-4. clip, te-dim and lr seem to be most important. Floatinghook robot. |
 
 General observation: Much fewer runs end in error, maybe due to lower (1e-4) max-grad-norm. Also, the network size does not seem to have much impact.
+Result from large 6-parameter search: keep net=[64,64], high lr (>0.01). te-dim=15, entropy 1e-4, clip=0.35. The "66f0572e86ef422c9497612f89d732ff" run looks especially promising.
 
-## Testing with hook robot
+## Testing with floatinghook robot
 
 The floatinghook was previously able to open lever doors occasionally - try again with the optimized hparams, both hnppo and vanilla ppo.
 
@@ -80,3 +82,4 @@ The floatinghook was previously able to open lever doors occasionally - try agai
 |---------------------------|----------|---------|-----------------------------------------------------------------------------------------------------------------|
 | hooktest_lever            | a5858514 | gpu1    | task 0 HNPPO: on the right track to solving task, does find lever and push down on it                           |
 | hooktest_lever_ppo_latest | c6499a0f | gpu3    | hparams from latest doorgym paper. **PPO can completely solve the task** with 90% success rate after 12M steps. |
+| hnppo_lever_long          | f006daa0 | gpu7    |                                                                                                                 |
