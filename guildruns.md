@@ -82,4 +82,24 @@ The floatinghook was previously able to open lever doors occasionally - try agai
 |---------------------------|----------|---------|-----------------------------------------------------------------------------------------------------------------|
 | hooktest_lever            | a5858514 | gpu1    | task 0 HNPPO: on the right track to solving task, does find lever and push down on it                           |
 | hooktest_lever_ppo_latest | c6499a0f | gpu3    | hparams from latest doorgym paper. **PPO can completely solve the task** with 90% success rate after 12M steps. |
-| hnppo_lever_long          | f006daa0 | gpu7    |                                                                                                                 |
+| hnppo_lever_long          | a2ef83d0 | gpu7    | 73% success rate after 340 epochs (paper PPO baseline had 68%                                                   |
+
+## Continual Learning series
+
+After figuring out suitable hparams for the pull and lever task with the floatinghook, we measure its CL performance by training on successive tasks.
+
+| Name                     | batch id | machine | task id | result                                                                                                                                          |
+|--------------------------|----------|---------|---------|-------------------------------------------------------------------------------------------------------------------------------------------------|
+| hnppo_lever_long         | a2ef83d0 | gpu7    | 0       | 73% success rate after 340 epochs (paper PPO baseline: 68%. Copied from the hparam search.                                                      |
+| hnppo_pull_1             | 7eb5622d | gpu2    | 1       | Reusing same hparams as for lever. Run failed after 1st epoch because of gradient explosion. This only happens with the high lr, 5e-3 lr works. |
+| hnppo_pull_1_defaultargs | eee49843 | gpu2    | 1       | 95% success rate after 40 epochs (baseline PPO: 95%), stabilizes between 95%-100% afterwards                                                    |
+| hnppo_lever_left_2       | d574e035 | gpu2    | 2       | Failed after 1st epoch, gradient explosion. lr=0.01 instead of 0.02 works for longer, but grad also exploded after 220 epochs. No opening.      |
+
+It seem like the found hparams make multi-task training unstable. Will try again with more default-ish hparams from Doorgym, similar to earlier `ppo-hn10` run.
+
+| Name                       | batch id | machine | task id | result |
+|----------------------------|----------|---------|---------|--------|
+| series2_hnppo_pull_0       | 8f10319b | gpu5    | 0       |        |
+| series2_hnppo_pull_left_1  |          | gpu5    | 1       |        |
+| series2_hnppo_lever_2      |          | gpu5    | 2       |        |
+| series2_hnppo_lever_left_3 |          | gpu5    | 3       |        |
