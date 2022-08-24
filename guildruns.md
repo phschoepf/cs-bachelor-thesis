@@ -88,18 +88,35 @@ The floatinghook was previously able to open lever doors occasionally - try agai
 
 After figuring out suitable hparams for the pull and lever task with the floatinghook, we measure its CL performance by training on successive tasks.
 
-| Name                     | batch id | machine | task id | result                                                                                                                                          |
-|--------------------------|----------|---------|---------|-------------------------------------------------------------------------------------------------------------------------------------------------|
-| hnppo_lever_long         | a2ef83d0 | gpu7    | 0       | 73% success rate after 340 epochs (paper PPO baseline: 68%. Copied from the hparam search.                                                      |
-| hnppo_pull_1             | 7eb5622d | gpu2    | 1       | Reusing same hparams as for lever. Run failed after 1st epoch because of gradient explosion. This only happens with the high lr, 5e-3 lr works. |
-| hnppo_pull_1_defaultargs | eee49843 | gpu2    | 1       | 95% success rate after 40 epochs (baseline PPO: 95%), stabilizes between 95%-100% afterwards                                                    |
-| hnppo_lever_left_2       | d574e035 | gpu2    | 2       | Failed after 1st epoch, gradient explosion. lr=0.01 instead of 0.02 works for longer, but grad also exploded after 220 epochs. No opening.      |
+| Name                     | batch id | machine | task id | result                                                                                                                                             |
+|--------------------------|----------|---------|---------|----------------------------------------------------------------------------------------------------------------------------------------------------|
+| hnppo_lever_long         | a2ef83d0 | gpu7    | 0       | 73% success rate after 340 epochs (paper PPO baseline: 68%. Copied from the hparam search.                                                         |
+| hnppo_pull_1             | 7eb5622d | gpu2    | 1       | Reusing same hparams as for lever. Run failed after 1st epoch because of gradient explosion. This only happens with the high lr, 5e-3 lr works.    |
+| hnppo_pull_1_defaultargs | eee49843 | gpu2    | 1       | 95% success rate after 40 epochs (baseline PPO: 95%), stabilizes between 95%-100% afterwards                                                       |
+| hnppo_lever_left_2       | d574e035 | gpu2    | 2       | Failed after 1st epoch, gradient explosion. lr=0.01 instead of 0.02 works, ran out of memory after 220 steps (probably other factors). No opening. |
 
 It seem like the found hparams make multi-task training unstable. Will try again with more default-ish hparams from Doorgym, similar to earlier `ppo-hn10` run.
 
-| Name                       | batch id | machine | task id | result |
-|----------------------------|----------|---------|---------|--------|
-| series2_hnppo_pull_0       | 8f10319b | gpu5    | 0       |        |
-| series2_hnppo_pull_left_1  |          | gpu5    | 1       |        |
-| series2_hnppo_lever_2      |          | gpu5    | 2       |        |
-| series2_hnppo_lever_left_3 |          | gpu5    | 3       |        |
+| Name                       | batch id           | machine | task id | result                                                                            |
+|----------------------------|--------------------|---------|---------|-----------------------------------------------------------------------------------|
+| series2_hnppo_pull_0       | 8f10319b           | gpu5    | 0       | 100% opening rate after 80 epochs, stopped run at 130 epochs                      |
+| series2_hnppo_pull_left_1  | f118768f, 42c6a0d4 | gpu5    | 1       | With pretrained policy at 130: grad explosion. At 120: no opening, learns nothing |
+
+After this: revert hnet width to 10x tnet size (instead of static 1024). Since we use [64,64] as tnet size, this means an overall smaller hnet.  
+Also reduced clipping-param back to 0.3 (used originally in hn tests)
+
+| Name                       | batch id | machine | task id | result                                                                                      |
+|----------------------------|----------|---------|---------|---------------------------------------------------------------------------------------------|
+| series2_hnppo_pull_0       | 93500640 | gpu5    | 0       | task solved after 40 epochs (>>95% opening rate)                                            |
+| series2_hnppo_pull_left_1  | 640d6ee1 | gpu5    | 1       | some forward transfer from task0, task fully solved after 20 epochs                         |
+| series2_hnppo_lever_2      | c710b1ac | gpu5    | 2       | gets close to solving the task, but does not press the handle down far enough               |
+| series2_hnppo_lever_2      | 8956a6e8 | gpu5    | 2       | trying smaller beta=2e-3 to give task more room to learn: 93% opening rate after 360 epochs |
+| series2_hnppo_lever_left_3 | b89db3e6 | gpu5    | 3       |                                                                                             |
+
+After CL failures in previous runs: trying beta=1e-3 on all runs, since no forgetting occurred at all so far
+
+| Name                       | batch id | machine | task id | result                                                             |
+|----------------------------|----------|---------|---------|--------------------------------------------------------------------|
+| series2_hnppo_pull_left_1  | d788a5af | gpu3    | 1       | Result: about same performance as with beta=5e-3                   |
+| series2_hnppo_lever_2      | ed78fd87 | gpu3    | 2       | much faster than run with higher beta, 95% after 120 epochs        |
+| series2_hnppo_lever_left_3 | 14626170 | gpu3    | 3       | 65% opening rate after 120 epochs, after that performance declines |
