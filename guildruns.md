@@ -115,8 +115,31 @@ Also reduced clipping-param back to 0.3 (used originally in hn tests)
 
 After CL failures in previous runs: trying beta=1e-3 on all runs, since no forgetting occurred at all so far
 
-| Name                       | batch id | machine | task id | result                                                             |
-|----------------------------|----------|---------|---------|--------------------------------------------------------------------|
-| series2_hnppo_pull_left_1  | d788a5af | gpu3    | 1       | Result: about same performance as with beta=5e-3                   |
-| series2_hnppo_lever_2      | ed78fd87 | gpu3    | 2       | much faster than run with higher beta, 95% after 120 epochs        |
-| series2_hnppo_lever_left_3 | 14626170 | gpu3    | 3       | 65% opening rate after 120 epochs, after that performance declines |
+| Name                       | batch id | machine | task id | result                                                                         |
+|----------------------------|----------|---------|---------|--------------------------------------------------------------------------------|
+| series2_hnppo_pull_left_1  | d788a5af | gpu3    | 1       | Result: about same performance as with beta=5e-3                               |
+| series2_hnppo_lever_2      | ed78fd87 | gpu3    | 2       | much faster than run with higher beta, 95% after 120 epochs                    |
+| series2_hnppo_lever_left_3 | 14626170 | gpu3    | 3       | 91% opening rate after 700 epochs, really slow progress compared to prev tasks |
+| series2_hnppo_lever_push_4 | cb74d12b | gpu3    | 4       | 38% opening rate after 80 epochs, drops back to 0 after that                   |
+
+series3: deterministic and even power beta. cuda-deterministic=True seed=1 beta=5e-4
+
+| Name                       | batch id | machine | task id | result                                                                   |
+|----------------------------|----------|---------|---------|--------------------------------------------------------------------------|
+| series3_hnppo_pull_0       | d1afae8a | gpu5    | 0       | 100% success after 80 epochs                                             |
+| series3_hnppo_pull_left_1  | c6c99906 | gpu5    | 1       | 71% success at zero-shot, 100% success after 20 episodes                 |
+| series3_hnppo_lever_2      | 101d2761 | gpu5    | 2       | no opening - strange, worked very well in series2                        |
+| series3_hnppo_lever_2      | de6b9553 | gpu5    | 2       | trying again with later checkpoint of pull_left - 86% after 365 episodes |
+| series3_hnppo_lever_left_3 | 8a902800 | gpu5    | 3       | no progress after 365 epochs                                             |
+| series3_hnppo_lever_push_4 |          |         | 4       |                                                                          |
+
+series4: back to beta=1e-3, worked better. cuda-deterministic=True seed=1
+
+| Name                       | batch id | machine | task id | result              |
+|----------------------------|----------|---------|---------|---------------------|
+| series3_hnppo_pull_0       | d1afae8a | gpu5    | 0       | reused from series3 |
+| series3_hnppo_pull_left_1  | 3a46bb8d | gpu1    | 1       |                     |
+| series3_hnppo_lever_2      |          |         | 2       |                     |
+| series3_hnppo_lever_left_3 |          |         | 3       |                     |
+| series3_hnppo_lever_push_4 |          |         | 4       |                     |
+
