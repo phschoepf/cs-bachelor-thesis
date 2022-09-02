@@ -134,22 +134,23 @@ series3: deterministic and even power beta. cuda-deterministic=True seed=1 beta=
 
 series4: back to beta=1e-3, worked better. cuda-deterministic=True seed=1
 
-| Name                            | batch id | machine | task id | result                 |
-|---------------------------------|----------|---------|---------|------------------------|
-| series3_hnppo_pull_0            | d1afae8a | gpu5    | 0       | reused from series3    |
-| series4_hnppo_pull_left_1       | 3a46bb8d | gpu1    | 1       | 100% after 60 episodes |
-| series4_hnppo_lever_2           | 7f28c4a1 | gpu1    | 2       | 97% after 180 episodes |
-| series4_hnppo_lever_left_3      | b4c0b302 | gpu1    | 3       | 86% after 340 episodes |
-| series4_hnppo_lever_push_4      | 1ad1b12e | gpu1    | 4       |                        |
-| series4_hnppo_lever_push_left_5 |          |         | 5       |                        |
+| Name                            | batch id | machine | task id | result                                                                       |
+|---------------------------------|----------|---------|---------|------------------------------------------------------------------------------|
+| series3_hnppo_pull_0            | d1afae8a | gpu5    | 0       | reused from series3                                                          |
+| series4_hnppo_pull_left_1       | 3a46bb8d | gpu1    | 1       | 100% after 60 episodes                                                       |
+| series4_hnppo_lever_2           | 7f28c4a1 | gpu1    | 2       | 97% after 180 episodes                                                       |
+| series4_hnppo_lever_left_3      | b4c0b302 | gpu1    | 3       | 86% after 340 episodes                                                       |
+| series4_hnppo_lever_push_4      | 1ad1b12e | gpu1    | 4       | 24% after 365 episodes, just started to solve the task when experiment ended |
+| series4_hnppo_lever_push_4      | ee0e6b67 | gpu1    | 4       | rerun with longer duration:                                                  |
+| series4_hnppo_lever_push_left_5 |          |         | 5       |                                                                              |
 
 series5: same as series4, but without freshcritic. Critic is in hnet for these runs. 
 
-| Name                            | batch id | machine | task id | result                 |
-|---------------------------------|----------|---------|---------|------------------------|
-| series5_hnppo_pull_0            | 89acf458 | gpu5    | 0       | 98% after 60 episodes  |
-| series5_hnppo_pull_left_1       | f84957b5 | gpu5    | 1       | 100% after 80 episodes |
-| series5_hnppo_lever_2           | 7a70a048 | gpu5    | 2       | 89% after 340 episodes |
-| series5_hnppo_lever_left_3      | 4ff63c96 | gpu5    | 3       |                        |
-| series5_hnppo_lever_push_4      |          |         | 4       |                        |
-| series5_hnppo_lever_push_left_5 |          |         | 5       |                        |
+| Name                            | batch id | machine | task id | result                                                           |
+|---------------------------------|----------|---------|---------|------------------------------------------------------------------|
+| series5_hnppo_pull_0            | 89acf458 | gpu5    | 0       | 98% after 60 episodes                                            |
+| series5_hnppo_pull_left_1       | f84957b5 | gpu5    | 1       | 100% after 80 episodes                                           |
+| series5_hnppo_lever_2           | 7a70a048 | gpu5    | 2       | 89% after 340 episodes                                           |
+| series5_hnppo_lever_left_3      | 4ff63c96 | gpu5    | 3       | 88% after 340 episodes, very similar learning profile as lever_2 |
+| series5_hnppo_lever_push_4      | 21d66fe7 | gpu5    | 4       | 87% affter 400 epochs                                            |
+| series5_hnppo_lever_push_left_5 | 3f088edd | gpu5    | 5       |                                                                  |
