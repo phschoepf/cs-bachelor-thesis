@@ -122,7 +122,7 @@ After CL failures in previous runs: trying beta=1e-3 on all runs, since no forge
 | series2_hnppo_lever_left_3 | 14626170 | gpu3    | 3       | 91% opening rate after 700 epochs, really slow progress compared to prev tasks |
 | series2_hnppo_lever_push_4 | cb74d12b | gpu3    | 4       | 38% opening rate after 80 epochs, drops back to 0 after that                   |
 
-series3: deterministic and even power beta. cuda-deterministic=True seed=1 beta=5e-4
+series3: deterministic and even lower beta. cuda-deterministic=True seed=1 beta=5e-4
 
 | Name                       | batch id | machine | task id | result                                                                   |
 |----------------------------|----------|---------|---------|--------------------------------------------------------------------------|
@@ -141,8 +141,8 @@ series4: back to beta=1e-3, worked better. cuda-deterministic=True seed=1
 | series4_hnppo_lever_2           | 7f28c4a1 | gpu1    | 2       | 97% after 180 episodes                                                       |
 | series4_hnppo_lever_left_3      | b4c0b302 | gpu1    | 3       | 86% after 340 episodes                                                       |
 | series4_hnppo_lever_push_4      | 1ad1b12e | gpu1    | 4       | 24% after 365 episodes, just started to solve the task when experiment ended |
-| series4_hnppo_lever_push_4      | ee0e6b67 | gpu1    | 4       | rerun with longer duration:                                                  |
-| series4_hnppo_lever_push_left_5 |          |         | 5       |                                                                              |
+| series4_hnppo_lever_push_4      | ee0e6b67 | gpu1    | 4       | rerun with longer duration: 84% after 660 episodes                           |
+| series4_hnppo_lever_push_left_5 | 4c5a8316 | gpu1    | 5       | highest reward of all, but no opening after 720 episodes                     |
 
 series5: same as series4, but without freshcritic. Critic is in hnet for these runs. 
 
@@ -153,4 +153,35 @@ series5: same as series4, but without freshcritic. Critic is in hnet for these r
 | series5_hnppo_lever_2           | 7a70a048 | gpu5    | 2       | 89% after 340 episodes                                           |
 | series5_hnppo_lever_left_3      | 4ff63c96 | gpu5    | 3       | 88% after 340 episodes, very similar learning profile as lever_2 |
 | series5_hnppo_lever_push_4      | 21d66fe7 | gpu5    | 4       | 87% affter 400 epochs                                            |
-| series5_hnppo_lever_push_left_5 | 3f088edd | gpu5    | 5       |                                                                  |
+| series5_hnppo_lever_push_left_5 | 3f088edd | gpu5    | 5       | no opening after 720 episodes                                    |
+
+series6: baseline for series5 (each task has a fresh hypernetwork and task_id=0)
+
+| Name                            | batch id | machine | task id | result                                            |
+|---------------------------------|----------|---------|---------|---------------------------------------------------|
+| series6_hnppo_pull_0            | 89acf458 | gpu5    | 0       | reused from series5                               |
+| series6_hnppo_pull_left_1       | 8470a8dc | gpu3    | 0       | 100% after 60 episodes                            |
+| series6_hnppo_lever_2           | ce5e9c44 | gpu5    | 0       | no opening after 365 episodes, but could be close |
+| series6_hnppo_lever_left_3      | d7ac3119 | gpu4    | 0       | 98% after 480 episodes (slower than CL version)   |
+| series6_hnppo_lever_push_4      | 7fb8df14 | gpu5    | 0       | 89% after 720 episodes, learned right at end      |
+| series6_hnppo_lever_push_left_5 | 2ed50347 | gpu3    | 0       |                                                   |
+
+series7: ppo-vanilla baseline, hparams from doorgym paper. deterministic, seed=[1, 31415, 27182, 1337]
+
+| Name                          | batch id | machine | seed   | result |
+|-------------------------------|----------|---------|--------|--------|
+| series7_ppo_pull_0            | 01047ec5 | gpu4    | 1      |        |
+| series7_ppo_pull_left_1       |          | gpu     | 1      |        |
+| series7_ppo_lever_2           |          | gpu     | 1      |        |
+| series7_ppo_lever_left_3      |          | gpu     | 1      |        |
+| series7_ppo_lever_push_4      |          | gpu     | 1      |        |
+| series7_ppo_lever_push_left_5 |          | gpu     | 1      |        |
+| --------------------------    | -------  | ------- | ------ | ------ |
+| series7_ppo_pull_0            | 896b2d3b | gpu5    | 31415  |        |
+| series7_ppo_pull_left_1       |          | gpu     | 31415  |        |
+| series7_ppo_lever_2           |          | gpu     | 31415  |        |
+| series7_ppo_lever_left_3      |          | gpu     | 31415  |        |
+| series7_ppo_lever_push_4      |          | gpu     | 31415  |        |
+| series7_ppo_lever_push_left_5 |          | gpu     | 31415  |        |
+
+long evals running on gpu1
