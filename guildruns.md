@@ -132,17 +132,33 @@ series3: deterministic and even lower beta. cuda-deterministic=True seed=1 beta=
 | series3_hnppo_lever_2      | de6b9553 | gpu5    | 2       | trying again with later checkpoint of pull_left - 86% after 365 episodes |
 | series3_hnppo_lever_left_3 | 8a902800 | gpu5    | 3       | no progress after 365 epochs                                             |
 
-series4: back to beta=1e-3, worked better. cuda-deterministic=True seed=1
+series4: back to beta=1e-3, worked better. cuda-deterministic=True
 
-| Name                            | batch id | machine | task id | result                                                                       |
-|---------------------------------|----------|---------|---------|------------------------------------------------------------------------------|
-| series3_hnppo_pull_0            | d1afae8a | gpu5    | 0       | reused from series3                                                          |
-| series4_hnppo_pull_left_1       | 3a46bb8d | gpu1    | 1       | 100% after 60 episodes                                                       |
-| series4_hnppo_lever_2           | 7f28c4a1 | gpu1    | 2       | 97% after 180 episodes                                                       |
-| series4_hnppo_lever_left_3      | b4c0b302 | gpu1    | 3       | 86% after 340 episodes                                                       |
-| series4_hnppo_lever_push_4      | 1ad1b12e | gpu1    | 4       | 24% after 365 episodes, just started to solve the task when experiment ended |
-| series4_hnppo_lever_push_4      | ee0e6b67 | gpu1    | 4       | rerun with longer duration: 84% after 660 episodes                           |
-| series4_hnppo_lever_push_left_5 | 4c5a8316 | gpu1    | 5       | highest reward of all, but no opening after 720 episodes                     |
+| Name                            | batch id | machine | task id | seed  | result                                                                       |
+|---------------------------------|----------|---------|---------|-------|------------------------------------------------------------------------------|
+| series3_hnppo_pull_0            | d1afae8a | gpu5    | 0       | 1     | reused from series3                                                          |
+| series4_hnppo_pull_left_1       | 3a46bb8d | gpu1    | 1       | 1     | 100% after 60 episodes                                                       |
+| series4_hnppo_lever_2           | 7f28c4a1 | gpu1    | 2       | 1     | 97% after 180 episodes                                                       |
+| series4_hnppo_lever_left_3      | b4c0b302 | gpu1    | 3       | 1     | 86% after 340 episodes                                                       |
+| series4_hnppo_lever_push_4      | 1ad1b12e | gpu1    | 4       | 1     | 24% after 365 episodes, just started to solve the task when experiment ended |
+| series4_hnppo_lever_push_4      | ee0e6b67 | gpu1    | 4       | 1     | rerun with longer duration: 84% after 660 episodes                           |
+| series4_hnppo_lever_push_left_5 | 4c5a8316 | gpu1    | 5       | 1     | highest reward of all, but no opening after 720 episodes                     |                                                          
+| ------------------------------- | -------- | ------- | ------- | ----- | ------------------------------------------------------------------------     |
+| series4_hnppo_pull_0            | f188b15a | gpu1    | 0       | 31415 |                                                                              |
+| series4_hnppo_pull_left_1       |          | gpu     | 1       | 31415 |                                                                              |
+| series4_hnppo_lever_2           |          | gpu     | 2       | 31415 |                                                                              |
+| series4_hnppo_lever_left_3      |          | gpu     | 3       | 31415 |                                                                              |
+| series4_hnppo_lever_push_4      |          | gpu     | 4       | 31415 |                                                                              |
+| series4_hnppo_lever_push_4      |          | gpu     | 4       | 31415 |                                                                              |
+| series4_hnppo_lever_push_left_5 |          | gpu     | 5       | 31415 |                                                                              |
+| ------------------------------- | -------- | ------- | ------- | ----- | ------------------------------------------------------------------------     |
+| series4_hnppo_pull_0            |          | gpu     | 0       | 27182 |                                                                              |
+| series4_hnppo_pull_left_1       |          | gpu     | 1       | 27182 |                                                                              |
+| series4_hnppo_lever_2           |          | gpu     | 2       | 27182 |                                                                              |
+| series4_hnppo_lever_left_3      |          | gpu     | 3       | 27182 |                                                                              |
+| series4_hnppo_lever_push_4      |          | gpu     | 4       | 27182 |                                                                              |
+| series4_hnppo_lever_push_4      |          | gpu     | 4       | 27182 |                                                                              |
+| series4_hnppo_lever_push_left_5 |          | gpu     | 5       | 27182 |                                                                              |
 
 series5: same as series4, but without freshcritic. Critic is in hnet for these runs. 
 
@@ -164,24 +180,36 @@ series6: baseline for series5 (each task has a fresh hypernetwork and task_id=0)
 | series6_hnppo_lever_2           | ce5e9c44 | gpu5    | 0       | no opening after 365 episodes, but could be close |
 | series6_hnppo_lever_left_3      | d7ac3119 | gpu4    | 0       | 98% after 480 episodes (slower than CL version)   |
 | series6_hnppo_lever_push_4      | 7fb8df14 | gpu5    | 0       | 89% after 720 episodes, learned right at end      |
-| series6_hnppo_lever_push_left_5 | 2ed50347 | gpu3    | 0       |                                                   |
+| series6_hnppo_lever_push_left_5 | 2ed50347 | gpu3    | 0       | 98% after 720 episodes, very linear progress      |
 
 series7: ppo-vanilla baseline, hparams from doorgym paper. deterministic, seed=[1, 31415, 27182, 1337]
 
-| Name                          | batch id | machine | seed   | result |
-|-------------------------------|----------|---------|--------|--------|
-| series7_ppo_pull_0            | 01047ec5 | gpu4    | 1      |        |
-| series7_ppo_pull_left_1       |          | gpu     | 1      |        |
-| series7_ppo_lever_2           |          | gpu     | 1      |        |
-| series7_ppo_lever_left_3      |          | gpu     | 1      |        |
-| series7_ppo_lever_push_4      |          | gpu     | 1      |        |
-| series7_ppo_lever_push_left_5 |          | gpu     | 1      |        |
-| --------------------------    | -------  | ------- | ------ | ------ |
-| series7_ppo_pull_0            | 896b2d3b | gpu5    | 31415  |        |
-| series7_ppo_pull_left_1       |          | gpu     | 31415  |        |
-| series7_ppo_lever_2           |          | gpu     | 31415  |        |
-| series7_ppo_lever_left_3      |          | gpu     | 31415  |        |
-| series7_ppo_lever_push_4      |          | gpu     | 31415  |        |
-| series7_ppo_lever_push_left_5 |          | gpu     | 31415  |        |
-
-long evals running on gpu1
+| Name                          | batch id | machine | seed   | result                                 |
+|-------------------------------|----------|---------|--------|----------------------------------------|
+| series7_ppo_pull_0            | 01047ec5 | gpu4    | 1      | 100% after 60 epis                     |
+| series7_ppo_pull_left_1       | 0f84eb84 | gpu4    | 1      | 100% after 40 epis                     |
+| series7_ppo_lever_2           | 2aabae2c | gpu4    | 1      | 92% after 360 epis                     |
+| series7_ppo_lever_left_3      | afb39543 | gpu4    | 1      | 99% after 280 epis, then decline to 94 |
+| series7_ppo_lever_push_4      | 97ae0d2c | gpu4    | 1      |                                        |
+| series7_ppo_lever_push_left_5 |          | gpu     | 1      |                                        |
+| --------------------------    | -------  | ------- | ------ | ------                                 |
+| series7_ppo_pull_0            | 896b2d3b | gpu5    | 31415  | 100% after 100 epis                    |
+| series7_ppo_pull_left_1       | 862704fd | gpu5    | 31415  | 100% after 100 epis                    |
+| series7_ppo_lever_2           | 148440a8 | gpu5    | 31415  | no opening                             |
+| series7_ppo_lever_left_3      | ca7dde3e | gpu5    | 31415  | 5% after 240 epis                      |
+| series7_ppo_lever_push_4      | 64e3a2a6 | gpu5    | 31415  |                                        |
+| series7_ppo_lever_push_left_5 |          | gpu     | 31415  |                                        |
+| --------------------------    | -------  | ------- | ------ | ------                                 |
+| series7_ppo_pull_0            | 9a1382a0 | gpu3    | 27182  | 100% after 160 epis                    |
+| series7_ppo_pull_left_1       | a4b4629f | gpu3    | 27182  | 100% after 60 epis                     |
+| series7_ppo_lever_2           | a11ea04e | gpu3    | 27182  |                                        |
+| series7_ppo_lever_left_3      |          | gpu     | 27182  |                                        |
+| series7_ppo_lever_push_4      |          | gpu     | 27182  |                                        |
+| series7_ppo_lever_push_left_5 |          | gpu     | 27182  |                                        |
+| --------------------------    | -------  | ------- | ------ | ------                                 |
+| series7_ppo_pull_0            |          | gpu     | 1337   |                                        |
+| series7_ppo_pull_left_1       |          | gpu     | 1337   |                                        |
+| series7_ppo_lever_2           |          | gpu     | 1337   |                                        |
+| series7_ppo_lever_left_3      |          | gpu     | 1337   |                                        |
+| series7_ppo_lever_push_4      |          | gpu     | 1337   |                                        |
+| series7_ppo_lever_push_left_5 |          | gpu     | 1337   |                                        |
