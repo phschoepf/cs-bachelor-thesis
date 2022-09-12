@@ -132,7 +132,8 @@ series3: deterministic and even lower beta. cuda-deterministic=True seed=1 beta=
 | series3_hnppo_lever_2      | de6b9553 | gpu5    | 2       | trying again with later checkpoint of pull_left - 86% after 365 episodes |
 | series3_hnppo_lever_left_3 | 8a902800 | gpu5    | 3       | no progress after 365 epochs                                             |
 
-series4: back to beta=1e-3, worked better. cuda-deterministic=True
+series4: HNPPO with freshcritic
+back to beta=1e-3, worked better. cuda-deterministic=True
 
 | Name                            | batch id | machine | task id | seed  | result                                                                       |
 |---------------------------------|----------|---------|---------|-------|------------------------------------------------------------------------------|
@@ -144,18 +145,18 @@ series4: back to beta=1e-3, worked better. cuda-deterministic=True
 | series4_hnppo_lever_push_4      | ee0e6b67 | gpu1    | 4       | 1     | rerun with longer duration: 84% after 660 episodes                           |
 | series4_hnppo_lever_push_left_5 | 4c5a8316 | gpu1    | 5       | 1     | highest reward of all, but no opening after 720 episodes                     |                                                          
 | ------------------------------- | -------- | ------- | ------- | ----- | ------------------------------------------------------------------------     |
-| series4_hnppo_pull_0            | f188b15a | gpu1    | 0       | 31415 |                                                                              |
-| series4_hnppo_pull_left_1       |          | gpu     | 1       | 31415 |                                                                              |
-| series4_hnppo_lever_2           |          | gpu     | 2       | 31415 |                                                                              |
-| series4_hnppo_lever_left_3      |          | gpu     | 3       | 31415 |                                                                              |
-| series4_hnppo_lever_push_4      |          | gpu     | 4       | 31415 |                                                                              |
-| series4_hnppo_lever_push_4      |          | gpu     | 4       | 31415 |                                                                              |
+| series4_hnppo_pull_0            | f188b15a | gpu1    | 0       | 31415 | 100% after 60 epis                                                           |
+| series4_hnppo_pull_left_1       | e71ded2f | gpu1    | 1       | 31415 | 100% after 120 epis                                                          |
+| series4_hnppo_lever_2           | a5f6790c | gpu1    | 2       | 31415 | start from early checkpoint 135, 14% after 360 epis                          |
+| series4_hnppo_lever_2           | 8780f15c | gpu2    | 2       | 31415 | start from later checkpoint 230: no opening                                  |
+| series4_hnppo_lever_left_3      | a4c50732 | gpu5    | 3       | 31415 | error with NaN after 680 epis, no opening                                    |
+| series4_hnppo_lever_push_4      | 2267b32d | gpu5    | 4       | 31415 |                                                                              |
 | series4_hnppo_lever_push_left_5 |          | gpu     | 5       | 31415 |                                                                              |
 | ------------------------------- | -------- | ------- | ------- | ----- | ------------------------------------------------------------------------     |
-| series4_hnppo_pull_0            |          | gpu     | 0       | 27182 |                                                                              |
-| series4_hnppo_pull_left_1       |          | gpu     | 1       | 27182 |                                                                              |
-| series4_hnppo_lever_2           |          | gpu     | 2       | 27182 |                                                                              |
-| series4_hnppo_lever_left_3      |          | gpu     | 3       | 27182 |                                                                              |
+| series4_hnppo_pull_0            | b671948b | gpu1    | 0       | 27182 | 100% after 80 epis                                                           |
+| series4_hnppo_pull_left_1       | 4de2fa91 | gpu1    | 1       | 27182 | 100% after 80 epis, erratic training graph. Stabilized after 300             |
+| series4_hnppo_lever_2           | 08792b9e | gpu1    | 2       | 27182 | 92% after 260 epis                                                           |
+| series4_hnppo_lever_left_3      | 2ab59e97 | gpu1    | 3       | 27182 |                                                                              |
 | series4_hnppo_lever_push_4      |          | gpu     | 4       | 27182 |                                                                              |
 | series4_hnppo_lever_push_4      |          | gpu     | 4       | 27182 |                                                                              |
 | series4_hnppo_lever_push_left_5 |          | gpu     | 5       | 27182 |                                                                              |
@@ -190,26 +191,46 @@ series7: ppo-vanilla baseline, hparams from doorgym paper. deterministic, seed=[
 | series7_ppo_pull_left_1       | 0f84eb84 | gpu4    | 1      | 100% after 40 epis                     |
 | series7_ppo_lever_2           | 2aabae2c | gpu4    | 1      | 92% after 360 epis                     |
 | series7_ppo_lever_left_3      | afb39543 | gpu4    | 1      | 99% after 280 epis, then decline to 94 |
-| series7_ppo_lever_push_4      | 97ae0d2c | gpu4    | 1      |                                        |
-| series7_ppo_lever_push_left_5 |          | gpu     | 1      |                                        |
+| series7_ppo_lever_push_4      | 97ae0d2c | gpu4    | 1      | 93% after 160 epis                     |
+| series7_ppo_lever_push_left_5 | f811d8b5 | gpu4    | 1      | 94% after 280 epis                     |
 | --------------------------    | -------  | ------- | ------ | ------                                 |
 | series7_ppo_pull_0            | 896b2d3b | gpu5    | 31415  | 100% after 100 epis                    |
 | series7_ppo_pull_left_1       | 862704fd | gpu5    | 31415  | 100% after 100 epis                    |
 | series7_ppo_lever_2           | 148440a8 | gpu5    | 31415  | no opening                             |
 | series7_ppo_lever_left_3      | ca7dde3e | gpu5    | 31415  | 5% after 240 epis                      |
-| series7_ppo_lever_push_4      | 64e3a2a6 | gpu5    | 31415  |                                        |
-| series7_ppo_lever_push_left_5 |          | gpu     | 31415  |                                        |
+| series7_ppo_lever_push_4      | aaabfab9 | gpu5    | 31415  | 100% after 680 epis                    |
+| series7_ppo_lever_push_left_5 | c4710a26 | gpu5    | 31415  | 32% after 640 epis                     |
 | --------------------------    | -------  | ------- | ------ | ------                                 |
 | series7_ppo_pull_0            | 9a1382a0 | gpu3    | 27182  | 100% after 160 epis                    |
 | series7_ppo_pull_left_1       | a4b4629f | gpu3    | 27182  | 100% after 60 epis                     |
-| series7_ppo_lever_2           | a11ea04e | gpu3    | 27182  |                                        |
-| series7_ppo_lever_left_3      |          | gpu     | 27182  |                                        |
-| series7_ppo_lever_push_4      |          | gpu     | 27182  |                                        |
-| series7_ppo_lever_push_left_5 |          | gpu     | 27182  |                                        |
-| --------------------------    | -------  | ------- | ------ | ------                                 |
-| series7_ppo_pull_0            |          | gpu     | 1337   |                                        |
-| series7_ppo_pull_left_1       |          | gpu     | 1337   |                                        |
-| series7_ppo_lever_2           |          | gpu     | 1337   |                                        |
-| series7_ppo_lever_left_3      |          | gpu     | 1337   |                                        |
-| series7_ppo_lever_push_4      |          | gpu     | 1337   |                                        |
-| series7_ppo_lever_push_left_5 |          | gpu     | 1337   |                                        |
+| series7_ppo_lever_2           | a11ea04e | gpu3    | 27182  | no opening                             |
+| series7_ppo_lever_left_3      | 68ed18ca | gpu3    | 27182  | no opening                             |
+| series7_ppo_lever_push_4      | a409b86d | gpu3    | 27182  | 92% after 180 epis                     |
+| series7_ppo_lever_push_left_5 | 57ba3e52 | gpu4    | 27182  | 94% after 200 epis                     |
+
+evals for cl-timeline plot running on gpu4 screen
+
+series8: ppo-finetuning, it's like series7 but we re-use the agents for each new task
+
+| Name                          | batch id | machine | seed   | result                           |
+|-------------------------------|----------|---------|--------|----------------------------------|
+| series7_ppo_pull_0            | 01047ec5 | gpu4    | 1      | 100% after 60 epis               |
+| series8_ppo_pull_left_1       | 87f5ee7c | gpu4    | 1      | 70% zeroshot, 100% after 40 epis |
+| series8_ppo_lever_2           | c6c2d30a | gpu4    | 1      | no opening                       |
+| series8_ppo_lever_left_3      | dfeb0fc0 | gpu4    | 1      |                                  |
+| series8_ppo_lever_push_4      |          | gpu     | 1      |                                  |
+| series8_ppo_lever_push_left_5 |          | gpu     | 1      |                                  |
+| --------------------------    | -------  | ------- | ------ | ------                           |
+| series7_ppo_pull_0            | 896b2d3b | gpu5    | 31415  | 100% after 100 epis              |
+| series8_ppo_pull_left_1       | 9db980b1 | gpu2    | 31415  | 100% after 100 epis              |
+| series8_ppo_lever_2           | 885557cc | gpu2    | 31415  |                                  |
+| series8_ppo_lever_left_3      |          | gpu     | 31415  |                                  |
+| series8_ppo_lever_push_4      |          | gpu     | 31415  |                                  |
+| series8_ppo_lever_push_left_5 |          | gpu     | 31415  |                                  |
+| --------------------------    | -------  | ------  | ------ | ------                           |
+| series7_ppo_pull_0            | 9a1382a0 | gpu3    | 27182  | 100% after 160 epis              |
+| series8_ppo_pull_left_1       | 0868504a | gpu3    | 27182  | 100% after 20 epis               |
+| series8_ppo_lever_2           | 92b23643 | gpu3    | 27182  | no opening                       |
+| series8_ppo_lever_left_3      | a70ffcb6 | gpu3    | 27182  |                                  |
+| series8_ppo_lever_push_4      |          | gpu     | 27182  |                                  |
+| series8_ppo_lever_push_left_5 |          | gpu     | 27182  |                                  |
