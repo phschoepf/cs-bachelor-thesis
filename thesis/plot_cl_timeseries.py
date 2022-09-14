@@ -1,13 +1,17 @@
-import os
-import pprint
+import argparse
 import re
 
 import matplotlib.pyplot as plt
 import sqlite3
 import yaml
 
+parser = argparse.ArgumentParser()
+parser.add_argument("-c", "--config", type=str)
+parser.add_argument("--seed", choices=[1, 3415, 27182], type=int)
+args = parser.parse_args()
+
 #####setup
-with open("../DoorGym/clmetrics/series4_config.yml") as cf:
+with open(args.config) as cf:
     config = yaml.safe_load(cf)
 db = sqlite3.connect("file:../DoorGym/clmetrics/eval_results.sqlite?mode=ro",
                      uri=True,
@@ -39,16 +43,16 @@ for task_id, eval_run in enumerate(config["runs"]):
 
 
 #####plot the data
-fig, ax = plt.subplots(figsize=(10, 3))
+fig, ax = plt.subplots(figsize=(10, 3.5))
 for key, line in plot_dict.items():
     line = list(zip(*line))
-    ax.plot(line[0], line[1], '-', label=key)
+    ax.plot(line[0], line[1], '-', label=key.replace("_blue_floatinghook", "").replace("_fixed", ""))
 for start_value in range(1, len(config["runs"])):
     ax.axvline(start_value, color='black', linestyle='dashed', alpha=0.5)
 ax.set_xlim((0,len(config["runs"])))
-ax.set_xlabel("Total Episodes")
-ax.set_ylabel("Opening ate")
+ax.set_ylabel("Opening rate")
 ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.27),
-          ncol=len(plot_dict)//2, fancybox=True, shadow=True)
+          ncol=len(plot_dict), fancybox=True, shadow=True)
+ax.title.set_text(f"HNPPO timeseries\n{args.config}")
 fig.tight_layout()
 fig.savefig("cl_timeseries_test.png")

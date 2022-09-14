@@ -150,16 +150,15 @@ back to beta=1e-3, worked better. cuda-deterministic=True
 | series4_hnppo_lever_2           | a5f6790c | gpu1    | 2       | 31415 | start from early checkpoint 135, 14% after 360 epis                          |
 | series4_hnppo_lever_2           | 8780f15c | gpu2    | 2       | 31415 | start from later checkpoint 230: no opening                                  |
 | series4_hnppo_lever_left_3      | a4c50732 | gpu5    | 3       | 31415 | error with NaN after 680 epis, no opening                                    |
-| series4_hnppo_lever_push_4      | 2267b32d | gpu5    | 4       | 31415 |                                                                              |
-| series4_hnppo_lever_push_left_5 |          | gpu     | 5       | 31415 |                                                                              |
+| series4_hnppo_lever_push_4      | 2267b32d | gpu5    | 4       | 31415 | 2% after 260 epis, then decline back to 0                                    |
+| series4_hnppo_lever_push_left_5 | 3915ca6b | gpu5    | 5       | 31415 |                                                                              |
 | ------------------------------- | -------- | ------- | ------- | ----- | ------------------------------------------------------------------------     |
 | series4_hnppo_pull_0            | b671948b | gpu1    | 0       | 27182 | 100% after 80 epis                                                           |
 | series4_hnppo_pull_left_1       | 4de2fa91 | gpu1    | 1       | 27182 | 100% after 80 epis, erratic training graph. Stabilized after 300             |
 | series4_hnppo_lever_2           | 08792b9e | gpu1    | 2       | 27182 | 92% after 260 epis                                                           |
-| series4_hnppo_lever_left_3      | 2ab59e97 | gpu1    | 3       | 27182 |                                                                              |
-| series4_hnppo_lever_push_4      |          | gpu     | 4       | 27182 |                                                                              |
-| series4_hnppo_lever_push_4      |          | gpu     | 4       | 27182 |                                                                              |
-| series4_hnppo_lever_push_left_5 |          | gpu     | 5       | 27182 |                                                                              |
+| series4_hnppo_lever_left_3      | 2ab59e97 | gpu1    | 3       | 27182 | 22% after 240 epis, then decline                                             |
+| series4_hnppo_lever_push_4      | 292fca9f | gpu1    | 4       | 27182 | error with NaN after 180 epis, no opening                                    |
+| series4_hnppo_lever_push_left_5 | 24b3d6d6 | gpu1    | 5       | 27182 | error with NaN after 120 epis, no opening                                    |
 
 series5: same as series4, but without freshcritic. Critic is in hnet for these runs. 
 
@@ -216,21 +215,21 @@ series8: ppo-finetuning, it's like series7 but we re-use the agents for each new
 |-------------------------------|----------|---------|--------|----------------------------------|
 | series7_ppo_pull_0            | 01047ec5 | gpu4    | 1      | 100% after 60 epis               |
 | series8_ppo_pull_left_1       | 87f5ee7c | gpu4    | 1      | 70% zeroshot, 100% after 40 epis |
-| series8_ppo_lever_2           | c6c2d30a | gpu4    | 1      | no opening                       |
-| series8_ppo_lever_left_3      | dfeb0fc0 | gpu4    | 1      |                                  |
-| series8_ppo_lever_push_4      |          | gpu     | 1      |                                  |
-| series8_ppo_lever_push_left_5 |          | gpu     | 1      |                                  |
+| series8_ppo_lever_2           | c6c2d30a | gpu4    | 1      | no opening @365                  |
+| series8_ppo_lever_left_3      | dfeb0fc0 | gpu4    | 1      | no opening @365                  |
+| series8_ppo_lever_push_4      | 29daa9e4 | gpu4    | 1      | 95% after 420 epis               |
+| series8_ppo_lever_push_left_5 | 1a48e400 | gpu4    | 1      | 93% after 440 epis               |
 | --------------------------    | -------  | ------- | ------ | ------                           |
 | series7_ppo_pull_0            | 896b2d3b | gpu5    | 31415  | 100% after 100 epis              |
 | series8_ppo_pull_left_1       | 9db980b1 | gpu2    | 31415  | 100% after 100 epis              |
-| series8_ppo_lever_2           | 885557cc | gpu2    | 31415  |                                  |
-| series8_ppo_lever_left_3      |          | gpu     | 31415  |                                  |
-| series8_ppo_lever_push_4      |          | gpu     | 31415  |                                  |
+| series8_ppo_lever_2           | 885557cc | gpu2    | 31415  | no opening @365                  |
+| series8_ppo_lever_left_3      | 1057a855 | gpu2    | 31415  | no opening @365                  |
+| series8_ppo_lever_push_4      | e6f583f2 | gpu2    | 31415  |                                  |
 | series8_ppo_lever_push_left_5 |          | gpu     | 31415  |                                  |
 | --------------------------    | -------  | ------  | ------ | ------                           |
 | series7_ppo_pull_0            | 9a1382a0 | gpu3    | 27182  | 100% after 160 epis              |
 | series8_ppo_pull_left_1       | 0868504a | gpu3    | 27182  | 100% after 20 epis               |
 | series8_ppo_lever_2           | 92b23643 | gpu3    | 27182  | no opening                       |
-| series8_ppo_lever_left_3      | a70ffcb6 | gpu3    | 27182  |                                  |
-| series8_ppo_lever_push_4      |          | gpu     | 27182  |                                  |
-| series8_ppo_lever_push_left_5 |          | gpu     | 27182  |                                  |
+| series8_ppo_lever_left_3      | a70ffcb6 | gpu3    | 27182  | no opening @365                  |
+| series8_ppo_lever_push_4      | d6414480 | gpu3    | 27182  | no opening @720                  |
+| series8_ppo_lever_push_left_5 | 352bd577 | gpu3    | 27182  |                                  |
