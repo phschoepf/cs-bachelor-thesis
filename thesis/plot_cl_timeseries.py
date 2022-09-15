@@ -1,4 +1,5 @@
 import argparse
+import os.path
 import re
 
 import matplotlib.pyplot as plt
@@ -6,8 +7,9 @@ import sqlite3
 import yaml
 
 parser = argparse.ArgumentParser()
-parser.add_argument("-c", "--config", type=str)
+parser.add_argument("-c", "--config", type=str, nargs="+")
 parser.add_argument("--seed", choices=[1, 3415, 27182], type=int)
+parser.add_argument("--ignore-tid", action="store_true", default=False)
 args = parser.parse_args()
 
 #####setup
@@ -30,12 +32,16 @@ for task_id, eval_run in enumerate(config["runs"]):
         res = cur.execute("SELECT checkpoint, opening_rate "
                           "FROM evals "
                           "WHERE checkpoint like ? AND world like ? AND task_id = ?",
-                          (f"%{run_id}%", f"%/{world}", task_id))
+                          (f"%{run_id}%", f"%/{world}", -1 if args.ignore_tid else task_id))
 
         rates_inner = res.fetchall() or []
         rates_inner = [(int(re.match(r".*\.(\d+)\.pt$", chp).group(1)), rate) for chp, rate in rates_inner]
-        highest_iter = max(r[0] for r in rates_inner)
-        rates_inner = [(chp / highest_iter + task_id + i, rate) for chp, rate in rates_inner]
+        try:
+            highest_iter = max(r[0] for r in rates_inner)
+            rates_inner = [(chp / highest_iter + task_id + i, rate) for chp, rate in rates_inner]
+        except ValueError:
+            # dummy opening rates if there is no data
+            rates_inner = [(task_id + i, -0.1), (task_id + i + 1, -0.1)]
         rates_inner = sorted(rates_inner, key=lambda x: x[0])
 
         rates_outer.extend(rates_inner)
@@ -50,9 +56,10 @@ for key, line in plot_dict.items():
 for start_value in range(1, len(config["runs"])):
     ax.axvline(start_value, color='black', linestyle='dashed', alpha=0.5)
 ax.set_xlim((0,len(config["runs"])))
+ax.set_ylim((-0.05, 1.05))
 ax.set_ylabel("Opening rate")
 ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.27),
           ncol=len(plot_dict), fancybox=True, shadow=True)
 ax.title.set_text(f"HNPPO timeseries\n{args.config}")
 fig.tight_layout()
-fig.savefig("cl_timeseries_test.png")
+fig.savefig(f"cl_timeseries_{os.path.splitext(os.path.basename(args.config))[0]}.png")
