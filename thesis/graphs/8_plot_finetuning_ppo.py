@@ -8,9 +8,13 @@ import yaml
 from matplotlib.lines import Line2D
 
 parser = argparse.ArgumentParser()
-parser.add_argument("-c", "--config", type=str, nargs="+")
-parser.add_argument("--seed", choices=[1, 3415, 27182], type=int)
-parser.add_argument("--ignore-tid", action="store_true", default=False)
+parser.add_argument(
+    "-c", "--config", type=str, nargs="+",
+    default=["../../DoorGym/clmetrics/series8_config.yml",
+             "../../DoorGym/clmetrics/series8_config_31415.yml",
+             "../../DoorGym/clmetrics/series8_config_27182.yml"]
+)
+parser.add_argument("--ignore-tid", action="store_true", default=True)
 args = parser.parse_args()
 
 #####setup
@@ -19,11 +23,11 @@ configs = []
 for config in args.config:
     with open(config) as cf:
         configs.append(yaml.safe_load(cf))
-db = sqlite3.connect("file:../DoorGym/clmetrics/eval_results.sqlite?mode=ro",
+db = sqlite3.connect("file:../../DoorGym/clmetrics/eval_results.sqlite?mode=ro",
                      uri=True,
                      detect_types=sqlite3.PARSE_DECLTYPES | sqlite3.PARSE_COLNAMES)
 cur = db.cursor()
-
+total_loads = 0
 
 def get_highest_iters(config):
     return [int(re.match(r".*\.(\d+)\.pt$", run["checkpoint"]).group(1)) for run in config["runs"]]
@@ -33,7 +37,7 @@ normalize_to = list(map(max, zip(*[get_highest_iters(c) for c in configs])))
 ######load data from db
 def get_plotdict(config):
     plot_dict = {}
-    # iterate over tasks
+    # iterate over tasks (=plot lines)
     for task_id, eval_run in enumerate(config["runs"]):
         world = eval_run["world"]
         rates_outer = []
@@ -46,9 +50,11 @@ def get_plotdict(config):
                               (f"%{run_id}%", f"%/{world}", -1 if args.ignore_tid else task_id))
 
             rates_inner = res.fetchall() or []
+            global total_loads
+            total_loads += len(rates_inner)
             rates_inner = [(int(re.match(r".*\.(\d+)\.pt$", chp).group(1)), rate) for chp, rate in rates_inner]
             try:
-                rates_inner = [(chp / normalize_to[task_id] + task_id + i, rate) for chp, rate in rates_inner]
+                rates_inner = [(chp / normalize_to[task_id + i] + task_id + i, rate) for chp, rate in rates_inner]
                 rates_inner = sorted(rates_inner, key=lambda x: x[0])
                 rates_inner.append((1 + task_id + i, rates_inner[-1][1]))
             except (ValueError, IndexError):
@@ -80,7 +86,8 @@ for i, plot_dict in enumerate(plot_dicts):
 # additional legend explaining different seeds
 seed_handles = [Line2D([0], [0], c='k', ls=linestyle[i], label=f"seed={s}") for i, s in enumerate([1,31415,27182])]
 ax.legend(handles=seed_handles, loc='upper center', bbox_to_anchor=(0.5, -0.35),
-        ncol=len(plot_dict), fancybox=True, shadow=True)
+        ncol=3, fancybox=True, shadow=True)
 ax.title.set_text(f"PPO finetuning\n{args.config[0]}")
 fig.tight_layout()
 fig.savefig(f"cl_timeseries_{os.path.splitext(os.path.basename(args.config[0]))[0]}.png")
+print(f"processed {total_loads} data points")
