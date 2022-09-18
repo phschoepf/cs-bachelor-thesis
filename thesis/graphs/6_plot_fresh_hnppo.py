@@ -32,7 +32,7 @@ cur = db.cursor()
 total_loads = 0
 
 def get_highest_iters(config):
-    return [int(re.match(r".*\.(\d+)\.pt$", run["checkpoint"]).group(1)) for run in config["runs"]]
+    return [int(re.match(r".*\.(\d+)\.pt$", run["ref_checkpoint"]).group(1)) for run in config["runs"]]
 
 normalize_to = list(map(max, zip(*[get_highest_iters(c) for c in configs])))
 
@@ -44,25 +44,24 @@ def get_plotdict(config):
         world = eval_run["world"]
         rates_outer = []
         # iterate over multiple runs (evaluate task for the run it was trained in and all future ones)
-        for i, train_run in enumerate(config["runs"][task_id:]):
-            run_id = train_run["ref_checkpoint"].split("/")[0]
-            res = cur.execute("SELECT checkpoint, opening_rate "
-                              "FROM evals "
-                              "WHERE checkpoint like ? AND world like ? AND task_id = ?",
-                              (f"%{run_id}%", f"%/{world}", 0))
+        run_id = eval_run["ref_checkpoint"].split("/")[0]
+        res = cur.execute("SELECT checkpoint, opening_rate "
+                          "FROM evals "
+                          "WHERE checkpoint like ? AND world like ? AND task_id = ?",
+                          (f"%{run_id}%", f"%/{world}", 0))
 
-            rates_inner = res.fetchall() or []
-            global total_loads
-            total_loads += len(rates_inner)
-            rates_inner = [(int(re.match(r".*\.(\d+)\.pt$", chp).group(1)), rate) for chp, rate in rates_inner]
-            try:
-                rates_inner = [(chp / normalize_to[task_id + i] + task_id + i, rate) for chp, rate in rates_inner]
-                rates_inner = sorted(rates_inner, key=lambda x: x[0])
-                rates_inner.append((1 + task_id + i, rates_inner[-1][1]))
-            except (ValueError, IndexError):
-                # dummy opening rates if there is no data
-                rates_inner = [(task_id+i,0)]
-            rates_outer.extend(rates_inner)
+        rates_inner = res.fetchall() or []
+        global total_loads
+        total_loads += len(rates_inner)
+        rates_inner = [(int(re.match(r".*\.(\d+)\.pt$", chp).group(1)), rate) for chp, rate in rates_inner]
+        try:
+            rates_inner = [(chp / normalize_to[task_id] + task_id, rate) for chp, rate in rates_inner]
+            rates_inner = sorted(rates_inner, key=lambda x: x[0])
+            rates_inner.append((1 + task_id, rates_inner[-1][1]))
+        except (ValueError, IndexError):
+            # dummy opening rates if there is no data
+            rates_inner = [(task_id, 0)]
+        rates_outer.extend(rates_inner)
         plot_dict[world] = rates_outer
     return plot_dict
 

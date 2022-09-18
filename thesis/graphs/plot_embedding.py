@@ -5,7 +5,7 @@ from sklearn.decomposition import PCA
 import matplotlib.pyplot as plt
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--pretrained-policy-load", type=str)
+parser.add_argument("--pretrained-policy-load", type=str, default="~/miniconda3/envs/doorgym/.guild/runs/3915ca6b405f453dbf539c2c0bbbd109/trained_models/hnppo/doorenv-v0_hnppo-lever_push_left/hnppo-lever_push_left.200.pt")
 args = parser.parse_args()
 
 actor_critic, _ = torch.load(args.pretrained_policy_load, map_location=torch.device("cpu"))
