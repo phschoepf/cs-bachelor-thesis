@@ -151,7 +151,7 @@ back to beta=1e-3, worked better. cuda-deterministic=True
 | series4_hnppo_lever_2           | 8780f15c | gpu2    | 2       | 31415 | start from later checkpoint 230: no opening                                  |
 | series4_hnppo_lever_left_3      | a4c50732 | gpu5    | 3       | 31415 | error with NaN after 680 epis, no opening                                    |
 | series4_hnppo_lever_push_4      | 2267b32d | gpu5    | 4       | 31415 | 2% after 260 epis, then decline back to 0                                    |
-| series4_hnppo_lever_push_left_5 | 3915ca6b | gpu5    | 5       | 31415 |                                                                              |
+| series4_hnppo_lever_push_left_5 | 3915ca6b | gpu5    | 5       | 31415 | 5% after 280 epis, then decline back to 0                                    |
 | ------------------------------- | -------- | ------- | ------- | ----- | ------------------------------------------------------------------------     |
 | series4_hnppo_pull_0            | b671948b | gpu1    | 0       | 27182 | 100% after 80 epis                                                           |
 | series4_hnppo_pull_left_1       | 4de2fa91 | gpu1    | 1       | 27182 | 100% after 80 epis, erratic training graph. Stabilized after 300             |
@@ -162,27 +162,56 @@ back to beta=1e-3, worked better. cuda-deterministic=True
 
 series5: same as series4, but without freshcritic. Critic is in hnet for these runs. 
 
-| Name                            | batch id | machine | task id | result                                                           |
-|---------------------------------|----------|---------|---------|------------------------------------------------------------------|
-| series5_hnppo_pull_0            | 89acf458 | gpu5    | 0       | 98% after 60 episodes                                            |
-| series5_hnppo_pull_left_1       | f84957b5 | gpu5    | 1       | 100% after 80 episodes                                           |
-| series5_hnppo_lever_2           | 7a70a048 | gpu5    | 2       | 89% after 340 episodes                                           |
-| series5_hnppo_lever_left_3      | 4ff63c96 | gpu5    | 3       | 88% after 340 episodes, very similar learning profile as lever_2 |
-| series5_hnppo_lever_push_4      | 21d66fe7 | gpu5    | 4       | 87% affter 400 epochs                                            |
-| series5_hnppo_lever_push_left_5 | 3f088edd | gpu5    | 5       | no opening after 720 episodes                                    |
+| Name                            | batch id | machine | task id | seed   | result                                                           |
+|---------------------------------|----------|---------|---------|--------|------------------------------------------------------------------|
+| series5_hnppo_pull_0            | 89acf458 | gpu5    | 0       | 1      | 98% after 60 episodes                                            |
+| series5_hnppo_pull_left_1       | f84957b5 | gpu5    | 1       | 1      | 100% after 80 episodes                                           |
+| series5_hnppo_lever_2           | 7a70a048 | gpu5    | 2       | 1      | 89% after 340 episodes                                           |
+| series5_hnppo_lever_left_3      | 4ff63c96 | gpu5    | 3       | 1      | 88% after 340 episodes, very similar learning profile as lever_2 |
+| series5_hnppo_lever_push_4      | 21d66fe7 | gpu5    | 4       | 1      | 87% affter 400 epochs                                            |
+| series5_hnppo_lever_push_left_5 | 3f088edd | gpu5    | 5       | 1      | no opening after 720 episodes                                    |
+| --------------------------      | -------  | ------- | ------  | ------ | ------------------                                               |
+| series5_hnppo_pull_0            | 0f35ca58 | gpu2    | 0       | 31415  | 100% after 40 episodes                                           |
+| series5_hnppo_pull_left_1       | f966d792 | gpu2    | 1       | 31415  | 100% after 100 epis                                              |
+| series5_hnppo_lever_2           | a52c29fc | gpu2    | 2       | 31415  |                                                                  |
+| series5_hnppo_lever_left_3      |          | gpu     | 3       | 31415  |                                                                  |
+| series5_hnppo_lever_push_4      |          | gpu     | 4       | 31415  |                                                                  |
+| series5_hnppo_lever_push_left_5 |          | gpu     | 5       | 31415  |                                                                  |
+| --------------------------      | -------  | ------- | ------  | ------ | ------------------                                               |
+| series5_hnppo_pull_0            | 329e2779 | gpu3    | 0       | 27182  | 100% after 60 episodes                                           |
+| series5_hnppo_pull_left_1       | 01730091 | gpu3    | 1       | 27182  | 100% after 80 episodes                                           |
+| series5_hnppo_lever_2           | 9b399ea3 | gpu3    | 2       | 27182  | 96% after 160 epis                                               |
+| series5_hnppo_lever_left_3      | 7e66b022 | gpu3    | 3       | 27182  |                                                                  |
+| series5_hnppo_lever_push_4      |          | gpu     | 4       | 27182  |                                                                  |
+| series5_hnppo_lever_push_left_5 |          | gpu     | 5       | 27182  |                                                                  |
 
 series6: baseline for series5 (each task has a fresh hypernetwork and task_id=0)
 
-| Name                            | batch id | machine | task id | result                                            |
-|---------------------------------|----------|---------|---------|---------------------------------------------------|
-| series6_hnppo_pull_0            | 89acf458 | gpu5    | 0       | reused from series5                               |
-| series6_hnppo_pull_left_1       | 8470a8dc | gpu3    | 0       | 100% after 60 episodes                            |
-| series6_hnppo_lever_2           | ce5e9c44 | gpu5    | 0       | no opening after 365 episodes, but could be close |
-| series6_hnppo_lever_left_3      | d7ac3119 | gpu4    | 0       | 98% after 480 episodes (slower than CL version)   |
-| series6_hnppo_lever_push_4      | 7fb8df14 | gpu5    | 0       | 89% after 720 episodes, learned right at end      |
-| series6_hnppo_lever_push_left_5 | 2ed50347 | gpu3    | 0       | 98% after 720 episodes, very linear progress      |
+| Name                            | batch id | machine | task id | seed   | result                                            |
+|---------------------------------|----------|---------|---------|--------|---------------------------------------------------|
+| series6_hnppo_pull_0            | 89acf458 | gpu5    | 0       | 1      | reused from series5                               |
+| series6_hnppo_pull_left_1       | 8470a8dc | gpu3    | 0       | 1      | 100% after 60 episodes                            |
+| series6_hnppo_lever_2           | ce5e9c44 | gpu5    | 0       | 1      | no opening after 365 episodes, but could be close |
+| series6_hnppo_lever_left_3      | d7ac3119 | gpu4    | 0       | 1      | 98% after 480 episodes (slower than CL version)   |
+| series6_hnppo_lever_push_4      | 7fb8df14 | gpu5    | 0       | 1      | 89% after 720 episodes, learned right at end      |
+| series6_hnppo_lever_push_left_5 | 2ed50347 | gpu3    | 0       | 1      | 98% after 720 episodes, very linear progress      |
+| --------------------------      | -------  | ------- | ------  | ------ | ------------------                                |
+| series6_hnppo_pull_0            | 0f35ca58 | gpu2    | 0       | 31415  | reused from series5                               |
+| series6_hnppo_pull_left_1       | 764114a3 | gpu4    | 0       | 31415  |                                                   |
+| series6_hnppo_lever_2           |          | gpu     | 0       | 31415  |                                                   |
+| series6_hnppo_lever_left_3      |          | gpu     | 0       | 31415  |                                                   |
+| series6_hnppo_lever_push_4      |          | gpu     | 0       | 31415  |                                                   |
+| series6_hnppo_lever_push_left_5 |          | gpu     | 0       | 31415  |                                                   |
+| --------------------------      | -------  | ------- | ------  | ------ | ------------------                                |
+| series6_hnppo_pull_0            | 329e2779 | gpu3    | 0       | 27182  | reused from series5                               |
+| series6_hnppo_pull_left_1       |          | gpu     | 0       | 27182  |                                                   |
+| series6_hnppo_lever_2           |          | gpu     | 0       | 27182  |                                                   |
+| series6_hnppo_lever_left_3      |          | gpu     | 0       | 27182  |                                                   |
+| series6_hnppo_lever_push_4      |          | gpu     | 0       | 27182  |                                                   |
+| series6_hnppo_lever_push_left_5 |          | gpu     | 0       | 27182  |                                                   |
 
-series7: ppo-vanilla baseline, hparams from doorgym paper. deterministic, seed=[1, 31415, 27182, 1337]
+
+series7: ppo-vanilla baseline, hparams from doorgym paper. deterministic, seed=[1, 31415, 27182]
 
 | Name                          | batch id | machine | seed   | result                                 |
 |-------------------------------|----------|---------|--------|----------------------------------------|
@@ -211,25 +240,50 @@ evals for cl-timeline plot running on gpu4 screen
 
 series8: ppo-finetuning, it's like series7 but we re-use the agents for each new task
 
-| Name                          | batch id | machine | seed   | result                           |
-|-------------------------------|----------|---------|--------|----------------------------------|
-| series7_ppo_pull_0            | 01047ec5 | gpu4    | 1      | 100% after 60 epis               |
-| series8_ppo_pull_left_1       | 87f5ee7c | gpu4    | 1      | 70% zeroshot, 100% after 40 epis |
-| series8_ppo_lever_2           | c6c2d30a | gpu4    | 1      | no opening @365                  |
-| series8_ppo_lever_left_3      | dfeb0fc0 | gpu4    | 1      | no opening @365                  |
-| series8_ppo_lever_push_4      | 29daa9e4 | gpu4    | 1      | 95% after 420 epis               |
-| series8_ppo_lever_push_left_5 | 1a48e400 | gpu4    | 1      | 93% after 440 epis               |
-| --------------------------    | -------  | ------- | ------ | ------                           |
-| series7_ppo_pull_0            | 896b2d3b | gpu5    | 31415  | 100% after 100 epis              |
-| series8_ppo_pull_left_1       | 9db980b1 | gpu2    | 31415  | 100% after 100 epis              |
-| series8_ppo_lever_2           | 885557cc | gpu2    | 31415  | no opening @365                  |
-| series8_ppo_lever_left_3      | 1057a855 | gpu2    | 31415  | no opening @365                  |
-| series8_ppo_lever_push_4      | e6f583f2 | gpu2    | 31415  |                                  |
-| series8_ppo_lever_push_left_5 |          | gpu     | 31415  |                                  |
-| --------------------------    | -------  | ------  | ------ | ------                           |
-| series7_ppo_pull_0            | 9a1382a0 | gpu3    | 27182  | 100% after 160 epis              |
-| series8_ppo_pull_left_1       | 0868504a | gpu3    | 27182  | 100% after 20 epis               |
-| series8_ppo_lever_2           | 92b23643 | gpu3    | 27182  | no opening                       |
-| series8_ppo_lever_left_3      | a70ffcb6 | gpu3    | 27182  | no opening @365                  |
-| series8_ppo_lever_push_4      | d6414480 | gpu3    | 27182  | no opening @720                  |
-| series8_ppo_lever_push_left_5 | 352bd577 | gpu3    | 27182  |                                  |
+| Name                          | batch id | machine | seed   | result                                 |
+|-------------------------------|----------|---------|--------|----------------------------------------|
+| series7_ppo_pull_0            | 01047ec5 | gpu4    | 1      | 100% after 60 epis                     |
+| series8_ppo_pull_left_1       | 87f5ee7c | gpu4    | 1      | 70% zeroshot, 100% after 40 epis       |
+| series8_ppo_lever_2           | c6c2d30a | gpu4    | 1      | no opening @365                        |
+| series8_ppo_lever_left_3      | dfeb0fc0 | gpu4    | 1      | no opening @365                        |
+| series8_ppo_lever_push_4      | 29daa9e4 | gpu4    | 1      | 95% after 420 epis                     |
+| series8_ppo_lever_push_left_5 | 1a48e400 | gpu4    | 1      | 93% after 440 epis                     |
+| --------------------------    | -------  | ------- | ------ | ------                                 |
+| series7_ppo_pull_0            | 896b2d3b | gpu5    | 31415  | 100% after 100 epis                    |
+| series8_ppo_pull_left_1       | 9db980b1 | gpu2    | 31415  | 100% after 100 epis                    |
+| series8_ppo_lever_2           | 885557cc | gpu2    | 31415  | no opening @365                        |
+| series8_ppo_lever_left_3      | 1057a855 | gpu2    | 31415  | no opening @365                        |
+| series8_ppo_lever_push_4      | e6f583f2 | gpu2    | 31415  | 45% after 340 epis, then back to 0     |
+| series8_ppo_lever_push_left_5 | bc4aafca | gpu3    | 31415  | 25% after 340 epis, erratic afterwards |
+| --------------------------    | -------  | ------  | ------ | ------                                 |
+| series7_ppo_pull_0            | 9a1382a0 | gpu3    | 27182  | 100% after 160 epis                    |
+| series8_ppo_pull_left_1       | 0868504a | gpu3    | 27182  | 100% after 20 epis                     |
+| series8_ppo_lever_2           | 92b23643 | gpu3    | 27182  | no opening                             |
+| series8_ppo_lever_left_3      | a70ffcb6 | gpu3    | 27182  | no opening @365                        |
+| series8_ppo_lever_push_4      | d6414480 | gpu3    | 27182  | no opening @720                        |
+| series8_ppo_lever_push_left_5 | 352bd577 | gpu3    | 27182  | 15% after 40 epis, then back to 0      |
+
+series9: Regularizer ablation study. HNPPO with freshcritic (like series4), but beta=0
+
+| Name                            | batch id | machine | task id | seed  | result                                      |
+|---------------------------------|----------|---------|---------|-------|---------------------------------------------|
+| series3_hnppo_pull_0            | d1afae8a | gpu5    | 0       | 1     | reused from series3                         |
+| series9_hnppo_pull_left_1       | f9d1f4f7 | gpu4    | 1       | 1     | 100% after 60 epis                          |
+| series9_hnppo_lever_2           | 8319c10c | gpu4    | 2       | 1     | 97% after 260 epis                          |
+| series9_hnppo_lever_left_3      | d6a623c5 | gpu4    | 3       | 1     | 98% after 260 epis                          |
+| series9_hnppo_lever_push_4      | b2db47ab | gpu4    | 4       | 1     | 95% after 300 epis                          |
+| series9_hnppo_lever_push_left_5 | f796fd60 | gpu4    | 5       | 1     | no opening @720                             |                                                          
+| ------------------------------- | -------- | ------- | ------- | ----- | -------                                     |
+| series4_hnppo_pull_0            | f188b15a | gpu1    | 0       | 31415 | reused from series4                         |
+| series9_hnppo_pull_left_1       | b3bf8c3d | gpu1    | 1       | 31415 | 100% after 160 epis                         |
+| series9_hnppo_lever_2           | 78f6084c | gpu1    | 2       | 31415 | 48% after 360 epis                          |
+| series9_hnppo_lever_left_3      | a3ae4845 | gpu1    | 3       | 31415 | 93% after 360 epis                          |
+| series9_hnppo_lever_push_4      | b1f9fd0c | gpu1    | 4       | 31415 | 100% after 400 epis                         |
+| series9_hnppo_lever_push_left_5 | 72eccbd6 | gpu1    | 5       | 31415 | no opening @720 epis                        |
+| ------------------------------- | -------- | ------- | ------- | ----- | ------                                      |
+| series4_hnppo_pull_0            | b671948b | gpu1    | 0       | 27182 | reused from series4                         |
+| series9_hnppo_pull_left_1       | b6438d2d | gpu5    | 1       | 27182 | 100% after 40 epis, but erratic graph after |
+| series9_hnppo_lever_2           | 8c541921 | gpu5    | 2       | 27182 | 2% after 60 epis, then back to 0            |
+| series9_hnppo_lever_left_3      | e64337b6 | gpu5    | 3       | 27182 | no opening @360                             |
+| series9_hnppo_lever_push_4      | 811055e9 | gpu5    | 4       | 27182 | 60% after 200 epis, then erratic            |
+| series9_hnppo_lever_push_left_5 | 501fadc4 | gpu5    | 5       | 27182 | 17%@340, then back to 0                     |
