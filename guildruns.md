@@ -173,17 +173,17 @@ series5: same as series4, but without freshcritic. Critic is in hnet for these r
 | --------------------------      | -------  | ------- | ------  | ------ | ------------------                                               |
 | series5_hnppo_pull_0            | 0f35ca58 | gpu2    | 0       | 31415  | 100% after 40 episodes                                           |
 | series5_hnppo_pull_left_1       | f966d792 | gpu2    | 1       | 31415  | 100% after 100 epis                                              |
-| series5_hnppo_lever_2           | a52c29fc | gpu2    | 2       | 31415  |                                                                  |
-| series5_hnppo_lever_left_3      |          | gpu     | 3       | 31415  |                                                                  |
-| series5_hnppo_lever_push_4      |          | gpu     | 4       | 31415  |                                                                  |
-| series5_hnppo_lever_push_left_5 |          | gpu     | 5       | 31415  |                                                                  |
+| series5_hnppo_lever_2           | a52c29fc | gpu2    | 2       | 31415  | 97% after 220 epis                                               |
+| series5_hnppo_lever_left_3      | 623cf220 | gpu5    | 3       | 31415  | 60% after 680 epis. used cp@360 for fairness in next run         |
+| series5_hnppo_lever_push_4      | a37e8498 | gpu5    | 4       | 31415  | no opening after 720 epis                                        |
+| series5_hnppo_lever_push_left_5 | 6100665a | gpu5    | 5       | 31415  | error with NaN after 80 epis, 46% opening                        |
 | --------------------------      | -------  | ------- | ------  | ------ | ------------------                                               |
 | series5_hnppo_pull_0            | 329e2779 | gpu3    | 0       | 27182  | 100% after 60 episodes                                           |
 | series5_hnppo_pull_left_1       | 01730091 | gpu3    | 1       | 27182  | 100% after 80 episodes                                           |
 | series5_hnppo_lever_2           | 9b399ea3 | gpu3    | 2       | 27182  | 96% after 160 epis                                               |
-| series5_hnppo_lever_left_3      | 7e66b022 | gpu3    | 3       | 27182  |                                                                  |
-| series5_hnppo_lever_push_4      |          | gpu     | 4       | 27182  |                                                                  |
-| series5_hnppo_lever_push_left_5 |          | gpu     | 5       | 27182  |                                                                  |
+| series5_hnppo_lever_left_3      | 7e66b022 | gpu3    | 3       | 27182  | error with NaN after 320 epis, no opening                        |
+| series5_hnppo_lever_push_4      | b1685c51 | gpu3    | 4       | 27182  | 91% after 680 epis                                               |
+| series5_hnppo_lever_push_left_5 | 34f1ba7c | gpu1    | 5       | 27182  | 50% after 80 epis, then got stuck and did not recover            |
 
 series6: baseline for series5 (each task has a fresh hypernetwork and task_id=0)
 
@@ -197,19 +197,18 @@ series6: baseline for series5 (each task has a fresh hypernetwork and task_id=0)
 | series6_hnppo_lever_push_left_5 | 2ed50347 | gpu3    | 0       | 1      | 98% after 720 episodes, very linear progress      |
 | --------------------------      | -------  | ------- | ------  | ------ | ------------------                                |
 | series6_hnppo_pull_0            | 0f35ca58 | gpu2    | 0       | 31415  | reused from series5                               |
-| series6_hnppo_pull_left_1       | 764114a3 | gpu4    | 0       | 31415  |                                                   |
-| series6_hnppo_lever_2           |          | gpu     | 0       | 31415  |                                                   |
-| series6_hnppo_lever_left_3      |          | gpu     | 0       | 31415  |                                                   |
-| series6_hnppo_lever_push_4      |          | gpu     | 0       | 31415  |                                                   |
-| series6_hnppo_lever_push_left_5 |          | gpu     | 0       | 31415  |                                                   |
+| series6_hnppo_pull_left_1       | 764114a3 | gpu4    | 0       | 31415  | 100% after 100 epis                               |
+| series6_hnppo_lever_2           | a308f1ee | gpu4    | 0       | 31415  | no opening after 360 epis                         |
+| series6_hnppo_lever_left_3      | 1e55ce3b | gpu2    | 0       | 31415  | no opening after 580 epis                         |
+| series6_hnppo_lever_push_4      | 0a17b6ff | gpu4    | 0       | 31415  | 93% after 700 epis                                |
+| series6_hnppo_lever_push_left_5 | 7594b0ce | gpu2    | 0       | 31415  | 76% after 720 epis                                |
 | --------------------------      | -------  | ------- | ------  | ------ | ------------------                                |
 | series6_hnppo_pull_0            | 329e2779 | gpu3    | 0       | 27182  | reused from series5                               |
-| series6_hnppo_pull_left_1       |          | gpu     | 0       | 27182  |                                                   |
-| series6_hnppo_lever_2           |          | gpu     | 0       | 27182  |                                                   |
-| series6_hnppo_lever_left_3      |          | gpu     | 0       | 27182  |                                                   |
-| series6_hnppo_lever_push_4      |          | gpu     | 0       | 27182  |                                                   |
-| series6_hnppo_lever_push_left_5 |          | gpu     | 0       | 27182  |                                                   |
-
+| series6_hnppo_pull_left_1       | b94e613a | gpu1    | 0       | 27182  | 100% after 60 epis                                |
+| series6_hnppo_lever_2           | f2aa0aa8 | gpu1    | 0       | 27182  | 83% after 360 epis                                |
+| series6_hnppo_lever_left_3      | a5e2ec36 | gpu6    | 0       | 27182  | no opening after 640 epis                         |
+| series6_hnppo_lever_push_4      | 34e6fe75 | gpu1    | 0       | 27182  | no opening after 720 epis, peak: 4%               |
+| series6_hnppo_lever_push_left_5 | e32a961b | gpu6    | 0       | 27182  | 33% after 720 epis                                |
 
 series7: ppo-vanilla baseline, hparams from doorgym paper. deterministic, seed=[1, 31415, 27182]
 
