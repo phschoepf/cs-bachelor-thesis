@@ -11,9 +11,8 @@ parser = argparse.ArgumentParser()
 parser.add_argument(
     "-c", "--config", type=str, nargs="+",
     default=["../../DoorGym/clmetrics/series5_config.yml",
-             # TODO add other seeds
-             #"../../DoorGym/clmetrics/series5_config_31415.yml",
-             #"../../DoorGym/clmetrics/series5_config_27182.yml"
+             "../../DoorGym/clmetrics/series5_config_31415.yml",
+             "../../DoorGym/clmetrics/series5_config_27182.yml"
              ]
 )
 parser.add_argument("--ignore-tid", action="store_true", default=False)
@@ -32,7 +31,12 @@ cur = db.cursor()
 total_loads = 0
 
 def get_highest_iters(config):
-    return [int(re.match(r".*\.(\d+)\.pt$", run["checkpoint"]).group(1)) for run in config["runs"]]
+    highests = []
+    for run in config["runs"]:
+        cl_max = int(re.match(r".*\.(\d+)\.pt$", run["checkpoint"]).group(1))
+        ref_max = int(re.match(r".*\.(\d+)\.pt$", run["ref_checkpoint"]).group(1))
+        highests.append(max(cl_max, ref_max))
+    return highests
 
 normalize_to = list(map(max, zip(*[get_highest_iters(c) for c in configs])))
 
@@ -71,7 +75,7 @@ plot_dicts = [get_plotdict(c) for c in configs]
 
 
 #####plot the data
-fig, ax = plt.subplots(figsize=(10, 3.7))
+fig, ax = plt.subplots(figsize=(10, 2))
 for i, plot_dict in enumerate(plot_dicts):
     for j, (key, line) in enumerate(plot_dict.items()):
         line = list(zip(*line))
@@ -81,15 +85,10 @@ for i, plot_dict in enumerate(plot_dicts):
     ax.set_xlim((0,len(configs[0]["runs"])))
     ax.set_ylim((-0.05, 1.05))
     ax.set_ylabel("Opening rate")
-    if i == 0:
-        l1 = ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.15),
-                  ncol=len(plot_dict), fancybox=True, shadow=True)
-        fig.add_artist(l1)
-# additional legend explaining different seeds
-seed_handles = [Line2D([0], [0], c='k', ls=linestyle[i], label=f"seed={s}") for i, s in enumerate([1,31415,27182])]
-ax.legend(handles=seed_handles, loc='upper center', bbox_to_anchor=(0.5, -0.35),
-        ncol=3, fancybox=True, shadow=True)
-ax.title.set_text(f"HNPPO, no fc\n{args.config[0]}")
+ax.title.set_text(f"HN-PPO")
+ax.tick_params(axis='x', color='white')
+ax.set_xticks([i+0.5 for i in range(6)])
+ax.set_xticklabels([f"Task {i}" for i in range(6)])
 fig.tight_layout()
-fig.savefig(f"cl_timeseries_{os.path.splitext(os.path.basename(args.config[0]))[0]}.png")
+fig.savefig(f"cl_timeseries_{os.path.splitext(os.path.basename(args.config[0]))[0]}.png", bbox_inches="tight")
 print(f"processed {total_loads} data points")
