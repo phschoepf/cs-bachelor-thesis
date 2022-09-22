@@ -92,7 +92,7 @@ for i, plot_dict in enumerate(plot_dicts):
 seed_handles = [Line2D([0], [0], c='k', ls=linestyle[i], label=f"seed={s}") for i, s in enumerate([1,31415,27182])]
 ax.legend(handles=seed_handles, loc='upper center', bbox_to_anchor=(0.5, -0.35),
         ncol=3, fancybox=True, shadow=True)
-ax.title.set_text(f"HNPPO+fresh network")
+ax.title.set_text(f"HN-PPO+fresh network")
 ax.tick_params(axis='x', color='white')
 ax.set_xticks([i+0.5 for i in range(6)])
 ax.set_xticklabels([f"Task {i}" for i in range(6)])
