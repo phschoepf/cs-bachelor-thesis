@@ -113,16 +113,20 @@ The reason for that is that the reviewers often do also not know a lot about the
 An example of this would be \url{https://arxiv.org/pdf/2206.03787.pdf} -- but this is also a personal taste thing.
 SA-CHECK}
 \section{Related Work} %\asOLD{Fuse with the previous section and use "Related Work" as its title}
-\paragraph{CL strategies} The many strategies for retaining previously learned knowledge, and thus alleviating the catastrophic forgetting problem, can be broadly categorized into four approaches according to \citet{threescenarios2}: Context-specific components, regularization, replay, and template methods. The latter is however most relevant for continual classification problems, and less so for RL settings. A similar classification has also been made in a review of CL methods by \citet{towardsCRL}.\\
-Context-specificity methods add parts to the network that are specific for each task, i.e. are only trained on a single task. Such methods include context-specific gating \citep{xdg}, which creates context-specificity by randomly excluding a subset of neurons from the network for each task, or progressive neural networks \citep{pnn}, in which a completely new set of parameters is trained for each task, and information is transferred from previous tasks via lateral connections between layers.\\
-Regularization can be applied at two levels to avoid catastrophic forgetting: In \textit{parameter} regularization, the objective is to minimize the changes of parameters which are important for previously learned tasks. The main challenge of parameter regularization is finding which parameters are most important to retain previous knowledge: \citet{ewc} use the Fisher information matrix to estimate parameter importance, and \citet{synapticintelligence} propose an online-learned importance measure in their \textit{Synaptic Intelligence} algorithm. Alternatively, regularization can be applied at the \textit{functional} level. Herein, the output of the network is encouraged to stay close to a target for a set of anchor points. Anchor points could be chosen from previous experience, or if it is undesired to store this data, a knowledge distillation loss can be used for functional regularization, as in \citet{lwf}. They propose a hybrid of functional regularization and parameter storage: \asOLD{ok, and?. Make sure that what you write is informative} Firstly, the network has a context-specific output layer, and regularization is applied between the new and previous outputs of the context-specific components of previous tasks, but using input data from the current task.\\
+\paragraph{CL strategies} The many strategies for retaining previously learned knowledge, and thus alleviating the catastrophic forgetting problem, can be broadly categorized into four approaches according to \citet{threescenarios2}: Context-specific components, regularization, replay, and template methods. The latter is however most relevant for continual classification problems, and less so for RL settings. A similar classification has also been made in a review of CL methods by \citet{towardsCRL}.
+
+Context-specificity methods add parts to the network that are specific for each task, i.e. are only trained on a single task. Such methods include context-specific gating \citep{xdg}, which creates context-specificity by randomly excluding a subset of neurons from the network for each task, or progressive neural networks \citep{pnn}, in which a completely new set of parameters is trained for each task, and information is transferred from previous tasks via lateral connections between layers.
+
+Regularization can be applied at two levels to avoid catastrophic forgetting: In \textit{parameter} regularization, the objective is to minimize the changes of parameters which are important for previously learned tasks. The main challenge of parameter regularization is finding which parameters are most important to retain previous knowledge: \citet{ewc} use the Fisher information matrix to estimate parameter importance, and \citet{synapticintelligence} propose an online-learned importance measure in their \textit{Synaptic Intelligence} algorithm. Alternatively, regularization can be applied at the \textit{functional} level. Herein, the output of the network is encouraged to stay close to a target for a set of anchor points. Anchor points could be chosen from previous experience, or if it is undesired to store this data, a knowledge distillation loss can be used for functional regularization, as in \citet{lwf}. They propose a hybrid of functional regularization and parameter storage: \asOLD{ok, and?. Make sure that what you write is informative} Firstly, the network has a context-specific output layer, and regularization is applied between the new and previous outputs of the context-specific components of previous tasks, but using input data from the current task.
+
 Finally, replay methods store experience from previous tasks in a buffer, and agents consequently revisit the recorded experience when training for new tasks. The policy is then jointly optimized on the current and replayed experience. Even though conceptually simple, replay suffers from bad scalability over many tasks, since large amounts of memory are required to store all past experience. An approach to improve scalability is to train a generative model alongside the policy model, and then sample from this model to obtain pseudo-data to revisit \citep{generativeReplay}.
 
 \saOLD{I'm not sure we need to write about LwF. But in any case, it will be beneficial to include an overview of continual RL methods (or those specifically applied to robotics). Check this paper for a review of such methods: \url{https://arxiv.org/pdf/2012.13490.pdf}. I also think that we need a little more content here.}
 
 \paragraph{DoorGym} %\asOLD{Again???. As before, fuse with previous section}
 The DoorGym environment \citep{doorgym} is a robot simulation based on OpenAI Gym \citep{gym}, where robot arms aim to open a door. Robots are controlled via a set of continuous input variables modeling joint torque (or torque and force on the end effector in case of \texttt{floating} robots). Different types of tasks are modeled through the door knob style (\texttt{pull}, \texttt{lever} or \texttt{round}) as well as the location of the hinge (\texttt{right} or \texttt{left}) and the opening direction (\texttt{pull} or \texttt{push}). Environments within a task domain have a multitude of randomized features, such as the location of the handle on the door, the exact shape of the handle, or the spring force on the lever and hinge.
-The original authors of the DoorGym environment \citep{doorgym} provide a baseline PPO and SAC agent for the \texttt{pull} and \texttt{lever} doors. It is demonstrated that PPO and SAC are in principle able to solve the door opening tasks, both in their ground configuration, and with added noise. We use their set of hyperparameters for the PPO agent for our experiments using PPO, as well as as a starting point for finding hyperparameters for HN-PPO. Of note, the authors did not make any attempt at a continual RL agent, nor was the DoorGym environment designed specifically for continual learning.\\
+The original authors of the DoorGym environment \citep{doorgym} provide a baseline PPO and SAC agent for the \texttt{pull} and \texttt{lever} doors. It is demonstrated that PPO and SAC are in principle able to solve the door opening tasks, both in their ground configuration, and with added noise. We use their set of hyperparameters for the PPO agent for our experiments using PPO, as well as as a starting point for finding hyperparameters for HN-PPO. Of note, the authors did not make any attempt at a continual RL agent, nor was the DoorGym environment designed specifically for continual learning.
+
 %\citet{MBRLHypernetworks} explore continual RL in DoorGym using the model-based cross-entropy method (CEM) \citep{rubinstein1997optimization} \textit{HyperCRL} on the DoorGym environment. Herein, it is shown that catastrophic forgetting occurs between different DoorGym tasks with traditional RL methods, and task-conditioned hypernetworks are established as a promising method to alleviate this. However, in their paper, it was not shown that the tasks could be completely solved, as they only reported normalized episode rewards, not success rates.
 %\sa{fixed missing reference and incorrect text}.
 %SA start
@@ -174,7 +178,7 @@ The PyTorch hypernetwork implementation used in our experiments is from \cite{au
 
 \subsection{Environment \asOLD{I think what you wrote about DoorGym should go here, otherwise it is way too many places.}}
 \saOLD{Add a subsection for the RL environment and describe here the details of the RL setup and tasks, including any modifications that you made to the default door-gym and the reasons for such modifications. This needs to be connected to the content about door-gym in the background section. So, in the background, you can describe the default door-gym environment and in this section you can describe your specific tasks and modifications.}
-In our experiments, we used an unmodified DoorGym \citep{doorgym} environment with the \texttt{blue-floatinghook} robot. This robot type was chosen due to both its simplicity and the good baseline performance on \texttt{pull} and \texttt{lever} doors. The robot resembles a hand with a hook for fingers, and is freely floating in 3D space. It has a 6D continuous input space, with three inputs controlling force in x/y/z direction, and three inputs controlling yaw/pitch/roll torque. None of the noise or vision features of DoorGym were used in our setup, i.e. observations are noise-free and directly derived from the environment simulation. We use the same 6-task sequence laid out in Table~\ref{tab:tasksequence} for all continual learning experiments. CL agents were sequentially trained on each environment. %Figure~\ref{fig:door-examples} provides example images of the robot interacting with some of the door environments.
+In our experiments, we used an unmodified DoorGym \citep{doorgym} environment with the \texttt{blue-floatinghook} robot. This robot type was chosen due to both its simplicity and the good baseline performance on \texttt{pull} and \texttt{lever} doors. The robot resembles a hand with a hook for fingers, and is freely floating in 3D space. It has a 6D continuous input space, with three inputs controlling force in x/y/z direction, and three inputs controlling yaw/pitch/roll torque. None of the noise or vision features of DoorGym were used in our setup, i.e. observations are noise-free and directly derived from the environment simulation. We use the same 6-task sequence laid out in Table~\ref{tab:tasksequence} for all continual learning experiments. CL agents were sequentially trained on each environment. Figure~\ref{fig:door-examples} provides example images of the robot interacting with some of the door environments.
 \saOLD{Some example images would be nice to have.}
 
 \begin{table}[b]
@@ -196,13 +200,13 @@ Task ID & Handle & Hinge location & Opening direction \\
 \end{center}
 \end{table}
 
-%\begin{figure}[htbp]
-%\begin{center}
-%\includegraphics[width=1.0\linewidth]{images/3doors.png}
-%\end{center}
-%\caption{Examples of the DoorGym environment and robot. Left: \texttt{pull} handle (task 0); middle: \texttt{lever} handle with left hinge (task 3); right: \texttt{lever} handle with inward %(\texttt{push}) opening direction (task 4).}
-%\label{fig:door-examples}
-%\end{figure}
+\begin{figure}[htbp]
+\begin{center}
+\includegraphics[width=1.0\linewidth]{images/3doors.png}
+\end{center}
+\caption{Examples of the DoorGym environment and robot. Left: \texttt{pull} handle (task 0); middle: \texttt{lever} handle with left hinge (task 3); right: \texttt{lever} handle with inward (\texttt{push}) opening direction (task 4).}
+\label{fig:door-examples}
+\end{figure}
 
 
 \subsection{Metrics}
@@ -377,11 +381,7 @@ Without regularization, the near-perfect remembering of previous tasks seen in \
 
 \section{Discussion}
 \asOLD{Start with summarizing what you did, this paragraph comes as too abrupt.} 
-In our experiments, we have shown that our \texttt{HN-PPO} agent can successfully learn to open up to 6 different types of doors. While \citet{MBRLHypernetworks} have demonstrated that hypernetwork-based CL is able to consistently achieve high returns on multiple DoorGym tasks, our work shows that this capability also extends to fully solving the task at hand, i.e. opening the door. To this end, we chose to use the door opening success rate (cf. Section~\ref{chap:metrics}) as the main performance indicator, in contrast to \citet{MBRLHypernetworks}, who report the average return as the core metric. 
-% LEN LIMIT
-% We argue that in a scenario with a clear final goal, such as door opening, the success rate better represents the quality of a policy.
-% LEN LIMIT END
-The training time until a door can be reliably opened is however significantly longer than what \citet{MBRLHypernetworks} experimented with. In their experiments, agents were trained for 60.000 environment steps per task, while we trained for up to $2.4*10^7$ environment steps per task. 
+In our experiments, we have shown that our \texttt{HN-PPO} agent can successfully learn to open up to 6 different types of doors. While \citet{MBRLHypernetworks} have demonstrated that hypernetwork-based CL is able to consistently achieve high returns on multiple DoorGym tasks, our work shows that this capability also extends to fully solving the task at hand, i.e. opening the door. To this end, we chose to use the door opening success rate (cf. Section~\ref{chap:metrics}) as the main performance indicator, in contrast to \citet{MBRLHypernetworks}, who report the average return as the core metric. We argue that in a scenario with a clear final goal, such as door opening, the success rate better represents the quality of a policy. The training time until a door can be reliably opened is however significantly longer than what \citet{MBRLHypernetworks} experimented with. In their experiments, agents were trained for 60.000 environment steps per task, while we trained for up to $2.4*10^7$ environment steps per task. 
 
 %\asOLD{Part of this paragraph, specially the last sentences would go better in the discussion}. 
 The distinction between these 2 metrics is further motivated by our discovery that under certain circumstances, the evaluation return of the DoorGym environment is not representative of the ability of an agent to solve the task. Similar returns in the same environment can correspond to vastly different opening rates, as shown in Figure~\ref{fig:return_opening_rate}. While the three return curves follow a similar pattern, one agent is able to solve the task with a high opening rate, while the other 2 are unsuccessful.
@@ -527,5 +527,22 @@ In this section, we show the train-test accuracy matrices, from which the CL met
 \end{array}\right]\]
 \end{itemize}
 
-%\paragraph{Code availability} The code used to run the experiments is available under \url{https://git.uibk.ac.at/csas8782/schoepf-bachelor-thesis}.
+\paragraph{Code availability} The code used to run the experiments is available under \url{https://git.uibk.ac.at/csas8782/schoepf-bachelor-thesis}.
 \end{document}
+
+
+\begin{table}[tb]
+\caption{CW metrics table. TODO: Should not be included in final version.}
+\label{tab:cw-results}
+\begin{center}
+\begin{tabular}{@{}lc@{}}
+\toprule
+Metric & Value \\ 
+\midrule
+Avg. performance           &  0.68 $\pm$ 0.049\\
+Training forward transfer  &  0.33 $\pm$ 0.040\\
+Forgetting                 &  0.0089 $\pm$ 0.0039\\
+\bottomrule
+\end{tabular}
+\end{center}
+\end{table}
