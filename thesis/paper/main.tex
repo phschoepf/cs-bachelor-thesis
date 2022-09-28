@@ -1,0 +1,507 @@
+\documentclass[dvipsnames]{article} % For LaTeX2e  %dvipsnames for xcolor. otherwise this generates an error
+\usepackage{iclr2023_conference,times}
+\usepackage{xcolor}
+
+% Optional math commands from https://github.com/goodfeli/dlbook_notation.
+\input{math_commands.tex}
+\usepackage[utf8]{inputenc}
+\usepackage{hyperref}
+\usepackage{url}
+\usepackage{graphicx}
+\usepackage{subcaption}
+\usepackage{booktabs}
+
+\title{Hypernetwork-PPO for Continual Reinforcement Learning}
+
+% Authors must not appear in the submitted version. They should be hidden
+% as long as the \iclrfinalcopy macro remains commented out below.
+% Non-anonymous submissions will be rejected without review.
+
+\author{Philemon Schöpf, Sayantan Auddy, Jakob Hollenstein \& Antonio Rodriguez-Sanchez\\
+Intelligent and Interactive Systems Group \\
+Department of Computer Science\\
+University of Innsbruck\\
+Innsbruck, Austria \\
+\texttt{philemon.schoepf@student.uibk.ac.at,} \\
+\texttt{\{sayantan.auddy, jakob.hollenstein, antonio.rodriguez-sanchez\}@uibk.ac.at} \\
+}
+
+% The \author macro works with any number of authors. There are two commands
+% used to separate the names and addresses of multiple authors: \And and \AND.
+%
+% Using \And between authors leaves it to \LaTeX{} to determine where to break
+% the lines. Using \AND forces a linebreak at that point. So, if \LaTeX{}
+% puts 3 of 4 authors names on the first line, and the last on the second
+% line, try using \AND instead of \And before the third author name.
+
+\newcommand{\fix}{\marginpar{FIX}}
+\newcommand{\new}{\marginpar{NEW}}
+
+%\iclrfinalcopy % Uncomment for camera-ready version, but NOT for submission.
+
+% Macros for comments
+\newcommand{\comment}[1]{}
+\newcommand{\todo}[1] {\comment{{\color{red} TODO: #1}}}             % TODO
+\newcommand{\ps}[1] {\comment{{\color {purple} PS: #1}}}             % Comments by Philemon
+\newcommand{\sa}[1] {\comment{{\color{cyan} SA: #1}}}                % Comments by Sayantan
+\newcommand{\jh}[1] {\comment{{\color{RawSienna} JH: #1}}}           % Comments by Jakob
+\newcommand{\as}[1] {\comment{{\color{orange} AS: #1}}}              % Comments by Antonio
+
+
+\begin{document}
+\maketitle
+\sa{We need to think about the title. At present this is far too generic.}
+
+\begin{abstract}
+\jh{Recently someone mentioned the following structure for the abstract: 1/3 introduction, 1/3 problem, 1/3 solution.}
+Continually learning new capabilities in different environments, and being able to solve multiple complex tasks is of great importance for many robotics applications. Modern reinforcement learning algorithms such as Proximal Policy Optimization can successfully handle surprisingly difficult tasks, but are generally not suited for multi-task or continual learning. Hypernetworks are a promising approach to avoiding catastrophic forgetting, and have previously been used successfully in model-based continual RL. We propose \texttt{HN-PPO}, a continual RL method employing a hypernetwork to learn multiple policies in a continual manner using PPO. We demonstrate our method on DoorGym, and show that it is suitable for solving tasks involving complex dynamics such as door opening, while effectively protecting against catastrophic forgetting. 
+\end{abstract}
+
+
+\section{Introduction}
+\label{chap:intro}
+Adapting to changing environments is a crucial and desirable ability for many robot systems. Advances in reinforcement learning (RL) such as Proximal Policy Optimization (PPO) \citep{ppo} or Soft Actor-Critic (SAC) \citep{sac} have enabled simulated robots to excel at solving complex continuous control tasks such as moving a stick figure and humanoid walking \citep{ppo}. 
+\sa{PPO and SAC are both algorithms for continuous action spaces, while Atari games have a discrete action space. Change this to a suitable example.}
+However, the resulting agents generally can only solve one narrowly defined task. When a new task is learned by fine-tuning the existing model 
+\as{is "fine-tuning" the right word?, maybe"adjustment"?}\jh{I think fine-tuning is the right word, but fine-tuning is not very common in RL; I mean the continual-RL field is very young/small; So I think you should add a little bit of text that smooths the transition and explains that you want to extend or re-use the previously learned things. Maybe the problem is that here you basically introduce continual learning without mentioning continual learning.}
+, the ability to solve the old task is often greatly diminished or completely lost - a phenomenon known as \textit{catastrophic forgetting}\sa{Cite the Parisi CL review paper}. Although a well-known problem \citep{MCCLOSKEY1989109}, catastrophic forgetting in sequential multi-task settings is still a major limitation for machine learning systems. This is in stark contrast to human learning, which very rarely exhibits forgetting when learning a new task \citep{parisiClReview}.
+
+A variety of \textit{continual learning} (CL) methods have been proposed to overcome this limitation. In a CL setting, multiple tasks are to be learned sequentially, while retaining or even improving knowledge about past tasks \citep{towardsCRL}. A naive approach towards this goal would be recording all previous experience of an agent, and replaying the recorded experience to a new agent when training new tasks. 
+\sa{For RL there is no training data as in supervised learning. What can be stored are the (S,A,R,S') tuples in a replay buffer which can then be utilized by an offline RL algorithm. Is this what you wanted to imply?}
+However, this method requires vast amounts of memory to store experiences, and thus does not scale well to a large number of tasks. Therefore CL desiderata often assume that previous experience will not be available when training new tasks \citep{lwf}. 
+
+\sa{This (or the end of this paragraph) is a good place to mention that previous work has used HN for model based RL, and we show that HN is a good candidate for continual RL for a state-of-the-art model-free algorithm as well. You should also mention the other differences with the MBRL paper (e.g. more types of doors, reporting of the door opening rate, etc.}
+Hypernetworks have been previously proposed as a promising method \citep{CLHypernetworks} for supervised continual learning. More recently, task-conditioned hypernetworks have also been employed in a model-based continual RL setting using the cross-entropy method (CEM) \citep{MBRLHypernetworks}. 
+
+%\jh{How about a "Contribution" paragraph heading such as this:} 
+
+%\paragraph{Contribution}
+
+%\jh{$<-$}
+%\jh{Basically we're proposing model-free continual-learning \textbf{policies} using hyper-networks, right? 
+%So basically, we propose to learn policies that can perform multiple task, and learn those policies in a continual-learning fashion; And we use hyper-networks for that. This sets us apart from previous %work \citet{MBRLHypernetworks} because they used continual learning to learn a Multi-Task? Transition model on which they performed model predictive control using CEM. }
+In this paper, we expand upon the work of \citet{MBRLHypernetworks}; evaluating the use of task-conditioned hypernetworks in \textit{model-free} continual RL. To this end, we propose a hypernetwork-based implementation of PPO (\texttt{HN-PPO}), a state-of-the-art online RL algorithm \as{I would remove the "simple-to-implement", do not see the relevance}. We show that \texttt{HN-PPO} can overcome catastrophic forgetting experienced by baseline PPO agents. In a single-task setting, \texttt{HN-PPO} has comparable success rates to what baseline PPO can achieve. Further, we conduct an ablation study confirming the importance of regularizing the hypernetwork on previous tasks in order to avoid catastrophic forgetting.\\
+As \citet{MBRLHypernetworks}, we use the DoorGym environment \citep{doorgym} in our experiments to demonstrate our method. This environment was chosen for its relevance to real-world robotics, where door opening is a highly relevant skill for autonomous mobile robots. Door opening is a well-suited scenario for continual RL, since a robot may encounter many different kinds of doors during its life. The clear separation between different kinds of doors also fits well with the \textit{task-incremental} \cite{threescenarios} CL scenario, where the task identity is clearly defined, and known at training and evaluation time. Our main contributions are:
+\begin{itemize}
+    \item A model-free continual RL algorithm, \texttt{HN-PPO}, using hypernetworks to learn a multi-task policy
+    \item An evaluation of CL performance in DoorGym using the door opening success rate as the main performance indicator.
+\end{itemize} 
+
+%\jh{I would use bullet points for the contributions; and if we provide a better evaluation than that might also be a contribution;}
+
+%\sa{Right now, the introduction is too short and a few other things need to be mentioned, such as the motivation behind this work (or why this is useful), a brief overview of our experimental setup (why %the doors environment is a good choice), a summary of the main contributions/findings, etc. It is useful for the reader if the doors environment is mentioned here, otherwise it suddenly jumps out of %nothing.
+
+%The paragraphs on HN, PPO and Door Gym should not be in the introduction but in a separate background section (done below).}
+
+\jh{I don't know if this contradicts what SA and AS but what I would do is to state the area of this work very briefly in the introduction (you are already doing that) and then list the contributions. And then basically start from adam and eve (in terms of RL, but very briefly) i.e. DQN -> Continuous Spaces -> SAC, PPO -> Continual Learning (what is it) -> CL other methods; Mostly you are already doing that. But for example in the paragraph "a varienty of contiual learning".. you describe continual learning more like you would in related work (IMO). 
+The reason for that is that the reviewers often do also not know a lot about the very specific field you are working on.
+An example of this would be \url{https://arxiv.org/pdf/2206.03787.pdf} -- but this is also a personal taste thing.
+SA-CHECK}
+\section{Related Work} %\as{Fuse with the previous section and use "Related Work" as its title}
+\paragraph{CL strategies} The many strategies for retaining previously learned knowledge, and thus alleviating the catastrophic forgetting problem, can be broadly categorized into four approaches according to \citet{threescenarios2}: Context-specific components, regularization, replay, and template methods. The latter is however most relevant for continual classification problems, and less so for unsupervised RL settings. A similar classification has also been made in a review of CL methods by \citet{towardsCRL}.\\
+Context-specificity methods add parts to the network that are specific for each task, i.e. are only trained on a single task. Such methods include context-specific gating \citep{xdg}, which creates context-specificity by randomly excluding a subset of neurons from the network for each task, or progressive neural networks \citep{pnn}, in which a completely new set of parameters is trained for each task, and information is transferred from previous tasks via lateral connections between layers.\\
+Regularization can be applied at two levels to avoid catastrophic forgetting: In \textit{parameter} regularization, the objective is to minimize the changes of parameters which are important for previously learned tasks. The main challenge of parameter regularization is finding which parameters are most important to retain previous knowledge: \citet{ewc} use the Fisher information matrix to estimate parameter importance, and \citet{synapticintelligence} propose an online-learned importance measure in their \textit{synaptic intelligence} algorithm. Alternatively, regularization can be applied at the \textit{functional} level. Herein, the output of the network is encouraged to stay close to a target for a set of anchor points. Anchor points could be chosen from previous experience, or if it is undesired to store this data, a knowledge distillation loss can be used for functional regularization, as in \citet{lwf}. They propose a hybrid of functional regularization and parameter storage: \as{ok, and?. Make sure that what you write is informative} Firstly, the network has a context-specific output layer, and regularization is applied between the new and previous outputs of the context-specific components of previous tasks, but using input data from the current task.\\
+Finally, replay methods store experience from previous tasks in a buffer, and agents consequently revisit the recorded experience when training for new tasks. The policy is then jointly optimized on the current and replayed experience. Even though conceptually simple, replay suffers from bad scalability over many tasks, since large amounts of memory are required to store all past experience. An approach to improve scalability is to train a generative alongside the policy model, and then sample from this model to obtain pseudo-data to revisit \citep{generativeReplay}.
+
+\sa{I'm not sure we need to write about LwF. But in any case, it will be beneficial to include an overview of continual RL methods (or those specifically applied to robotics). Check this paper for a review of such methods: \url{https://arxiv.org/pdf/2012.13490.pdf}. I also think that we need a little more content here.}
+
+\paragraph{DoorGym} %\as{Again???. As before, fuse with previous section}
+The DoorGym \citep{doorgym} environment is a robot simulation based on OpenAI Gym \citep{gym}, where robot arms aim to open a door. Robots are controlled via a set of continuous input variables modeling joint torque (or torque and force on the end effector in case of \texttt{floating} robots). Different types of tasks are modeled through the door knob style (\texttt{pull}, \texttt{lever} or \texttt{round}) as well as the location of the hinge (\texttt{right} or \texttt{left}) and the opening direction (\texttt{pull} or \texttt{push}). Environments within a task domain have a multitude of randomized features, such as the location of the handle on the door, the exact shape of the handle, or the spring force on the lever and hinge.
+The original authors of the DoorGym environment \cite{doorgym} provide a baseline PPO and SAC agent for the \texttt{pull} and \texttt{lever} doors. It is demonstrated that PPO and SAC are in principle suitable to solve the door opening tasks, both in their ground configuration, and with added noise. We use their set of hyperparameters for the PPO agent for our experiments using PPO, as well as as a starting point for finding hyperparameters for HN-PPO. Of note, the authors did not make any attempt at a continual RL agent, nor was the DoorGym environment designed specifically for continual learning.\\
+\citet{MBRLHypernetworks} explores continual RL in DoorGym using the model-based cross-entropy method (CEM). \textit{HyperCRL} on the DoorGym environment. Herein, it is shown that catastrophic forgetting occurs between different DoorGym tasks with traditional RL methods, and task-conditioned hypernetworks are established as a promising method to alleviate this. However, in their paper, it was not shown that the tasks could be completely solved, as they only reported normalized episode rewards, not success rates.
+
+
+\section{Background}
+\as{There should be here an introductory sentence on the areas you are going to review below and why. There has to be a link between them.}
+Our proposed method uses PPO \citep{ppo} to continually learn policies for different door-opening tasks of the DoorGym environment \citep{doorgym}. A hypernetwork \cite{CLHypernetworks} architecture is used to prevent catastrophic forgetting.
+
+\paragraph{Hypernetworks}
+In a task-incremental CL setting $\mathcal{X}\times\mathcal{C}\rightarrow\mathcal{Y}$ \citep{threescenarios}, a \textit{task-conditioned hypernetwork} is a neural network $h$ that maps the task identity $\mathcal{C}$ to a set of parameters of a target network, i.e. $h:\mathcal{C}\rightarrow t$. The target network $t:\mathcal{X}\rightarrow\mathcal{Y}$ then maps observations $\mathcal{X}$ of the RL agent to its actions $\mathcal{Y}$. The task identity $\mathcal{C}$ is represented by a low-dimensional, trainable embedding vector in our implementation, which is based on work by \citet{auddyHollensteinClfd}.
+
+To preserve previously learned skills, regularization is applied at the meta-level: At the beginning of training a new task, the outputs $\Theta_t$ of the hypernetwork are recorded for each previous task embedding $t$ \citep{CLHypernetworks}. Since this output completely defines the target network for a each task, keeping the $\Theta_t$ constant during training of a new task will guarantee preservation of the learned dynamics. We hence apply an $L2$ penalty on changes of the hypernetwork's output:
+
+\begin{gather}
+    \Theta_t=h(t, \Theta_h) \\
+    \mathcal{L}_{reg} = \beta\frac{1}{T-1}\sum^T_{t=0} ||\Theta_t - \Theta_{t,new}||_2 \label{regloss}
+\end{gather}
+
+The regularization coefficient $\beta$ is a supplied hyperparameter. Of note, $\Theta_{t,new}$ is calculated after a \textit{candidate change} to the hypernetwork weights $\Theta_h$ is already applied. This results in a 2-stage weight update routine; the candidate change is first calculated from the task loss $\mathcal{L}_{task}$, then the "true" change $\Delta\Theta_h$ is calculated using both the task and regularization loss \citep{CLHypernetworks}. 
+
+Because the update routine requires passing all previous task embeddings through the hypernetwork to calculate the $\Theta_{t,new}$, the computational expense of a training step increases $\mathcal{O}(n)$ with respect to the number of tasks. Importantly though, the model size stays nearly constant\jh{nearly constant is a bit contradictory, no? Maybe you can be more specific by how much it grows.}. Only a low-dimensional embedding vector is added for each task, fulfilling the CL desideratum of not explicitly accumulating previous experience.
+
+\paragraph{Proximal Policy Optimization}
+PPO is a policy gradient method using a \textit{clipped surrogate objective}. A policy is optimized by estimating its gradient, and conducting gradient ascent steps to maximize the reward. The gradient is estimated by differentiating the objective function
+\begin{equation}
+    L_t(\theta) = \mathbb{E}_t\left[\frac{\pi_\theta(a_t|s_t)}{\pi_{\theta_{old}}(a_t|s_t)}\hat{A}_t\right]
+\end{equation}
+with advantage $\hat{A}_t$, and a probabilistic policy $\pi_{\theta}(a_t|s_t)$. In PPO, this objective is constrained by clipping excessively large changes in probability ratio:
+\begin{equation}
+\label{ppo-clip}
+    L^{clip}_t(\theta)  = \mathbb{E}_t \left[min\left(\frac{\pi_\theta(a_t|s_t)}{\pi_{\theta_{old}}(a_t|s_t)}\hat{A}_t, clip\left(\frac{\pi_\theta(a_t|s_t)}{\pi_{\theta_{old}}(a_t|s_t)}, 1+\epsilon,1-\epsilon \right)\hat{A}_t\right)\right] 
+\end{equation}
+\citep{ppo}. $\epsilon$ is a hyperparameter and defines the allowable change of the policy. \as{There are some parameters still not defined, like $\pi_\theta$, make sure they all clear what they are}. This improves the policy stability by removing big changes in the probability ratios of the old and new policies during a training step. It is conceptually similar to trust-region policy optimization \cite{trpo}, but is easier to implement, since it omits the KL-divergence based constraint in trust-region policy optimization \as{I think you are abusing the use of acronyms, if you plan to use them less than 5 times, do not use the acronym}. 
+
+Additionally to the action objective in Eq. \ref{ppo-clip}, we use a trainable value estimator (called a "critic network") as proposed by \citet{gae} to introduce a value loss term $L^{vf}$. An entropy bonus $S$ is also added to incentivize exploration of the parameter space. The complete objective function thus has 3 parts, with value coefficient $c_v$ and entropy coefficient $c_e$ being hyperparameters.
+\begin{equation}
+\label{ppo-actorcritic}
+    L^{total}_t(\theta) = L^{clip}_t(\theta)+ c_vL^{vf}_t(\theta)+c_eS_{\pi_\theta}(s_t)
+\end{equation}
+
+
+\section{Method}
+We extend the existing implementation of PPO in DoorGym to use a hypernetwork to generate the weights of the policy network. Two variants of HN-PPO were implemented: A straightforward implementation (\texttt{HN-PPO}) which places both the actor and critic networks' parameters under the control of the hypernetwork, and a modified variant that only generates the actor network via a hypernetwork and uses an ordinary MLP as the critic (\texttt{HN-PPO+fc}). In the latter variant, the critic is re-initialized for each new task seen by the agent (cf. Appendix \ref{chap:architecture} for details). Because the critic is only used during training, it does not influence the policy at evaluation time, nor is it strictly required to remember multiple dynamics. However, forward transfer characteristics could still benefit learning of new tasks.\\
+The PyTorch hypernetwork implementation used in our experiments is from \cite{auddyHollensteinClfd} and was used without modifications. 
+
+\subsection{Environment \as{I think what you wrote about DoorGym should go here, otherwise it is way too many places.}}
+\sa{Add a subsection for the RL environment and describe here the details of the RL setup and tasks, including any modifications that you made to the default door-gym and the reasons for such modifications. This needs to be connected to the content about door-gym in the background section. So, in the background, you can describe the default door-gym environment and in this section you can describe your specific tasks and modifications.}
+In our experiments, we used an unmodified DoorGym \cite{doorgym} environment with the \texttt{blue-floatinghook} robot. This robot type was chosen due to both its simplicity and the good baseline performance on \texttt{pull} and \texttt{lever} doors. The robot resembles a hand with a hook for fingers, and is freely floating in 3D space. It has a 6D continuous input space, with three inputs controlling force in x/y/z direction, and three inputs controlling yaw/pitch/roll torque. None of the noise or vision features of DoorGym were used in our setup, i.e. observations are noise-free and directly derived from the environment simulation. We use the same 6-task sequence laid out in Tab. \ref{tab:tasksequence} for all continual learning experiments. CL agents were sequentially trained on each environment. %Fig. \ref{fig:door-examples} provides example images of the robot interacting with some of the door environments.
+\sa{Some example images would be nice to have.}
+
+\begin{table}[htbp]
+\caption{Series of door opening tasks for CL.}
+\label{tab:tasksequence}
+\begin{center}
+\begin{tabular}{@{}llll@{}}
+\toprule
+Task ID & Handle & Hinge location & Opening direction \\ 
+\midrule
+0 & \texttt{pull}  & right & pull \\
+1 & \texttt{pull}  & left  & pull \\
+2 & \texttt{lever} & right & pull \\
+3 & \texttt{lever} & left  & pull \\
+4 & \texttt{lever} & right & push \\
+5 & \texttt{lever} & left  & push \\
+\bottomrule
+\end{tabular}
+\end{center}
+\end{table}
+
+%\begin{figure}[htbp]
+%\begin{center}
+%\includegraphics[width=1.0\linewidth]{images/3doors.png}
+%\end{center}
+%\caption{Examples of the DoorGym environment and robot. Left: \texttt{pull} handle (task 0); middle: \texttt{lever} handle with left hinge (task 3); right: \texttt{lever} handle with inward %(\texttt{push}) opening direction (task 4).}
+%\label{fig:door-examples}
+%\end{figure}
+
+
+\subsection{Metrics}
+\label{chap:metrics}
+To evaluate the capability of the trained agents, we use the evaluation success rate as the primary metric. In each evaluation, agents are tested on 100 pseudo-randomly picked worlds (of 3000 total), and an opening attempt is deemed successful if the door was opened at least 0.2 rad within 20 seconds of simulation time \citep{doorgym}. Multiple continual learning metrics are derived from the success rates of an agent in different stages of its training.
+
+\paragraph{Continual Learning Metrics} \citet{moreThanForgetting} propose a set of CL metrics based on a train-test accuracy matrix: After training an agent on $N$ tasks, the entries  $\emR_{i,j}$ of the $\mR\in \R^{N\times N}$ accuracy matrix is defined as $\text{accuracy on task }j\text{ after training on task }i$. If $j>i$ and thus the task $j$ to be evaluated is not known to the hypernetwork, then $i$ is used in the hypernetwork to generate the target network weights (i.e. the embedding of the last known task is used). 
+Using the accuracy matrix $A$, forward transfer ($FT$), positive backward transfer ($BWT^+$) and remembering ($REM$) are calculated. The latter 2 are derived from the \textit{backward transfer} $BWT$, but are separated to keep all metrics within $[0,1]$.
+\begin{align}
+    A =     & \frac{2\sum_{i=0}^n(\sum_{j\leq i}^n\emR_{i,j})}{N(N+1)} \label{eq:accuracy}\\
+    FT =    & \frac{2\sum_{i=0}^n(\sum_{j=i+1}^n\emR_{i,j})}{N(N-1)} \label{eq:FT}\\
+    BWT =   & \frac{2\sum_{i=1}^n(\sum_{j=0}^{i-1}(\emR_{i,j}-\emR_{j,j}))}{N(N-1)} \label{eq:BTW}\\
+    BWT^+ = & max(0, BWT) \label{eq:BWT+}\\
+    REM =   & 1-|min(BWT,0)| \label{eq:REM}
+\end{align}
+
+\ps{Will not report the TFT metric, getting too long. \paragraph{Training Forward Transfer} The CL metrics based on the train-test accuracy matrix only represent the result at the end of an agent's training on a given task. To get insight into the agents' behavior during training time, we also report the forward transfer metric proposed by \citet{continualWorld}. This metric compares the areas under the curve (AUC) for the training curves of the CL method ($\text{AUC}^{cl}$) with a baseline method ($\text{AUC}^{ref}$) for each task $i$. Intuitively, positive forward transfer here indicates faster learning compared to the baseline, while negative forward transfer indicates slowdown and/or a lower final accuracy. To differentiate this metric from the forward transfer derived from the train-test accuracy matrix (Eq. \ref{eq:FT}), we will hereafter refer to it as "training forward transfer" (TFT).
+\sa{Introduce an abbreviation for this, such as TFT.}
+\begin{align}
+    TFT = \frac{1}{n}\sum_{i=0}^n \frac{\text{AUC}_i^{cl}-\text{AUC}_i^{ref}}{1-\text{AUC}_i^{ref}} \label{eq:TFT}
+\end{align}
+}
+
+\section{Experimental evaluation}
+\label{chap:experiments}
+We conducted multiple experiments to evaluate the ability of HN-PPO to learn the complex dynamics of different door opening tasks. A special focus was set on analyzing how well catastrophic forgetting can be avoided by using a task-conditioned hypernetwork, and whether forward transfer could be observed during the training sequence. All experiments were run three times with different PRNG seeds. Reported values are the mean $\pm$ SEM of 3 independent results.
+
+\subsection{Baselines}
+
+Table \ref{tab:opening-rates} shows the average after-training opening rates for each task and each method discussed in the following sections. Opening rates are reported at the end of training for a specific task, before any other tasks are visited by the agent. Comparing the results for the non-CL methods (PPO, PPO-finetuning, and \texttt{HNPPO}+fresh network), the \texttt{pull} doors (task 0 and 1) are the easiest to open, while the \texttt{lever} doors with pull opening direction (task 2 and 3) are the hardest to open.
+
+\begin{table}[tb]
+\caption{After-training opening rates per task.}
+\label{tab:opening-rates}
+\begin{center}
+\begin{tabular}{@{}lccccc@{}}
+\toprule
+Task ID & PPO & PPO-finetuning & \texttt{HNPPO}+fresh network & \texttt{HNPPO} & \texttt{HNPPO+fc} \\ 
+\midrule
+0 & 1.00 $\pm$ 0.00  & 1.00 $\pm$ 0.00& 0.98 $\pm$ 0.014 & 0.98 $\pm$ 0.014 & 1.00 $\pm$ 0.00\\
+1 & 1.00 $\pm$ 0.0027& 1.00 $\pm$ 0.00& 0.97 $\pm$ 0.018 & 1.00 $\pm$ 0.00  & 1.00 $\pm$ 0.00 \\
+2 & 0.32 $\pm$ 0.26  & 0.00 $\pm$ 0.00& 0.27 $\pm$ 0.22  & 0.92 $\pm$ 0.014 & 0.69 $\pm$ 0.21\\
+3 & 0.32 $\pm$ 0.25  & 0.00 $\pm$ 0.00& 0.25 $\pm$ 0.20  & 0.31 $\pm$ 0.25  & 0.36 $\pm$ 0.23\\
+4 & 0.96 $\pm$ 0.014 & 0.37 $\pm$ 0.23& 0.59 $\pm$ 0.24  & 0.59 $\pm$ 0.24  & 0.25 $\pm$ 0.21\\
+5 & 0.63 $\pm$ 0.22  & 0.36 $\pm$ 0.24& 0.69 $\pm$ 0.15  & 0.36 $\pm$ 0.15  & 0.01 $\pm$ 0.011\\
+\midrule
+Average & 0.71 $\pm$ 0.17 & 0.46 $\pm$ 0.14 & 0.63 $\pm$ 0.17 & 0.69 $\pm$ 0.15 & 0.55 $\pm$ 0.15\\
+\bottomrule
+\end{tabular}
+\end{center}
+\end{table}
+
+
+Tables \ref{tab:cl-metrics-baselines} and \ref{tab:cl-metrics-cl} list the CL metrics (cf. Section \ref{chap:metrics}) for all experiments discussed in the following. The tables are split for layout purposes only. 
+
+\begin{table}[tb]
+\caption{Continual learning metrics for baseline experiments. The low accuracies and remembering scores indicate catastrophic forgetting. \jh{What do you think about booktabs style like this?}}
+\label{tab:cl-metrics-baselines}
+\begin{center}
+\begin{tabular}{@{}lccc@{}}
+\toprule
+Metric & PPO & PPO-finetuning & \texttt{HN-PPO}+fresh network \\
+\midrule
+Accuracy               & 0.24 $\pm$ 0.035 & 0.20 $\pm$ 0.035 & 0.21 $\pm$ 0.023 \\
+Forward transfer       & 0.10 $\pm$ 0.0022& 0.10 $\pm$ 0.028 & 0.03 $\pm$ 0.0021 \\
+Pos. backward transfer & 0.00 $\pm$ 0.00  & 0.00 $\pm$ 0.00  & 0.00 $\pm$ 0.00 \\
+Remembering            & 0.29 $\pm$ 0.078 & 0.47 $\pm$ 0.060 & 0.32 $\pm$ 0.019 \\
+\bottomrule
+\end{tabular}
+\end{center}
+\end{table}
+
+\begin{table}[tb]
+\caption{Continual learning metrics for \texttt{HN-PPO} and \texttt{HN-PPO+fc}. Remembering is at its maximum possible value, 1.00, for both methods, indicating no forgetting is taking place.}
+\label{tab:cl-metrics-cl}
+\begin{center}
+\begin{tabular}{@{}lcc@{}}
+\toprule
+Metric & \texttt{HN-PPO} & \texttt{HN-PPO+fc} \\ 
+\midrule
+Accuracy               &  0.81 $\pm$ 0.041 & 0.73 $\pm$ 0.080\\
+Forward transfer       &  0.052 $\pm$ 0.0095 & 0.04 $\pm$ 0.0054\\
+Pos. backward transfer &  0.0015 $\pm$ 0.0013 & 0.00 $\pm$ 0.00018\\
+Remembering            &  \textbf{1.00} $\pm$ 0.0024 & \textbf{1.00} $\pm$ 0.0044\\
+\bottomrule
+\end{tabular}
+\end{center}
+\end{table}
+
+
+\paragraph{PPO} The single-task PPO implementation in DoorGym, based on code from \citet{pytorchrl}, was used as a baseline for the performance of individual tasks. Hyperparameters for PPO are taken from \citep{doorgym}. For this baseline, a new agent is created for each task, and only trained on that specific task. We observe that the baseline algorithm reliably learns to solve the tasks with \texttt{pull} handles, but yields unstable results for the more challenging \texttt{lever} handles, depending on the seed being used. In the case of tasks 2, 3 and 5, seed dependence was prominent enough so that the agent completely failed to solve the task for one seed, while it could achieve close to 100\% opening rate using a different seed. Fig. \ref{fig:ppo-baseline-graph} shows the door opening rate of the agents at different points in the training progress. The large differences between seeds can clearly be observed, especially in tasks 2 and 3, which use the \texttt{lever} knob. The average after-training opening rate across all 6 tasks is 71\% (\ref{tab:opening-rates}).
+\sa{This is where a separate PPO agent is trained on each task, right? Make it more explicit.}
+
+
+\paragraph{PPO-finetuning} This baseline uses "standard" PPO as before, but instead of creating a new model for each task in the sequence and training it independently, a single agent is fine-tuned on each task in the sequence. The resulting model from training for one task is then used as a pre-trained model for the next task. Since PPO makes no considerations towards continual learning, fine-tuning of policies learned with PPO serves as a lower baseline for the ability of an agent to retain knowledge of previous tasks.
+The opening rates plotted in Fig. \ref{fig:ppo-finetuning-graph} show the expected catastrophic forgetting at the task boundary for some tasks (e.g. between task 1 and 2), but also reveal interesting transfer behaviors. Between task 0 and 1 (both \texttt{pull} handles), only little forgetting of knowledge on task 0 occurs, while task 1 has a zero-shot success rate of 61\% thanks to pre-training on task 0. This is likely due to the high similarity of dynamics for these two tasks. On the other hand, the agents' success rate on the \texttt{lever} tasks (2 and 3) was greatly reduced compared to the PPO baseline. Strikingly, even though no success was achieved in solving the \texttt{lever} task during training, one agent was able to open \texttt{lever} doors after being trained on the subsequent \texttt{lever\_push} task (task 4)\as{be consistent with the task fornts. Also I do not know what those numbers refer to in the figure} interval in Fig. \ref{fig:ppo-finetuning-graph}).
+
+These unexpected observations demonstrate the complex relationships between different door opening tasks, which can potentially be exploited by continual learning. 
+
+\begin{figure}[htbp]
+\begin{subfigure}{\linewidth}
+    \includegraphics[width=1.0\linewidth]{images/cl_timeseries_series7_config.png}
+    \caption{}
+    \label{fig:ppo-baseline-graph}
+\end{subfigure}
+\begin{subfigure}{\linewidth}
+    \includegraphics[width=1.0\linewidth]{images/cl_timeseries_series8_config.png}
+    \caption{}
+    \label{fig:ppo-finetuning-graph}
+\end{subfigure}
+\caption{Door opening rates using \textbf{(a)} PPO and \textbf{(b)} PPO-finetuning for different door opening tasks and seeds. The x-axis represents the training progress normalized to the longest training run for each task. Progress can thus be compared for multiple training runs of the same task, but not between different tasks. Note that in (a), the sequence of tasks is chosen for consistency with other figures. Each task is trained and evaluated independently.\jh{Instead of plotting all three seeds, how about plotting the median value and a shaded area?}}
+\end{figure}
+
+\paragraph{HN-PPO+fresh network} To directly compare the impact of previous experience of a \texttt{HN-PPO} agent on its performance, we train a new \texttt{HN-PPO} agent for each task in this experiment. Like in the PPO baseline, each agent is only trained on a single task, and all agents are trained independently. Since this experiment uses the same network architecture that is used for continual learning, any difference to this baseline is a direct result of an agent's previous experience. Similar to the PPO baseline, large performance differences were again observed between different seeds, as can be seen in Fig. \ref{fig:hnppo_graph_fresh}). The average after-training opening rate is slightly lower than what was achieved by PPO (63\% vs. 71\% for PPO), but within the errors of the respective values (Tab. \ref{tab:opening-rates}).
+
+
+\subsection{Continual Learning Experiments}
+\paragraph{HN-PPO}
+\label{chap:hnppo}
+In this experiment, a single \texttt{HN-PPO} agent was trained sequentially on the tasks in the CL sequence. Fig. \ref{fig:hnppo_graph} shows the opening rate for each of the 6 tasks in the CL sequence during the agents' training. The lack of sharp drops in the opening rate graph clearly indicates that the hypernetwork is able to learn multiple tasks with different dynamics without any significant loss of accuracy in previously seen tasks.  \texttt{HN-PPO} shows excellent protection against catastrophic forgetting, achieving a remembering score of 1.00, as can be seen in Tab. \ref{tab:cl-metrics-cl}. This indicates that on average, no skill was lost by learning additional skills. The method also achieves very similar after-training opening rates to the PPO baseline (Tab. \ref{tab:opening-rates}), which confirms that the CL capabilities do not adversely affect PPO's single-task performance. While there is virtually no forgetting, significant backward transfer does also not occur. This result is expected, since the hypernetwork regularization aims to minimize changes to previously learned dynamics, both beneficial and detrimental.
+
+\begin{figure}[htbp]
+\begin{subfigure}{\linewidth}
+    \includegraphics[width=1.0\linewidth]{images/cl_timeseries_series5_config.png}
+    \caption{}
+    \label{fig:hnppo_graph}
+\end{subfigure}
+\begin{subfigure}{\linewidth}
+    \includegraphics[width=1.0\linewidth]{images/cl_timeseries_series6_config.png}
+    \caption{}
+    \label{fig:hnppo_graph_fresh}
+\end{subfigure}
+\caption{\textbf{(a)} Door opening rates using \texttt{HN-PPO}, \textbf{(b)} \texttt{HN-PPO} with a fresh network for each task.\jh{the data for this plot (a) are still incomplete, right?}}
+\end{figure}
+
+\paragraph{Fresh Critic}
+\label{chap:freshcritic}
+In this experiment, a modified \texttt{HN-PPO} agent is used, which only parameterizes the actor network with a hypernetwork. The critic network on the other hand is freshly initialized for each task. This alternative architecture, \texttt{HN-PPO+fc}, is then trained on the CL task sequence in the same way as the \texttt{HN-PPO} agent. Compared to standard \texttt{HN-PPO}, the after-training opening rate is 20\% lower (55\%, vs. 69\% for \texttt{HN-PPO}) and the CL accuracy is 10\% lower (73\%, vs. 81\% for \texttt{HN-PPO}). Importantly though, we find that \texttt{HN-PPO+fc} exhibits the same, highly effective protection against catastrophic forgetting as \texttt{HN-PPO}, also having a remembering score of 1.00. 
+ 
+\begin{figure}[htbp]
+\begin{center}
+\includegraphics[width=1.0\linewidth]{images/cl_timeseries_series4_config.png}
+\end{center}
+\caption{Door opening rates using HN-PPO+fc.
+\sa{Isn't this result only for 1 seed? I think we should show the results for the other seeds as well.} \ps{obviously, more data is coming ;)}
+}
+\label{fig:hnppo+fc-graph}
+\end{figure}
+
+\subsection{Regularizer Ablation Study}
+\label{chap:ablation}
+In this experiment, we aim to investigate the importance of regularizing the weights of previously learned tasks. Experiments were run with the same hyperparameters and environments as in \ref{chap:hnppo}, but regularization of the hypernetwork outputs on previous task embeddings was disabled by setting $\beta=0$ (cf. Eq. \ref{regloss}). Removing hypernetwork regularization resulted in a 67\% decrease in average accuracy, as well as a 76\% decrease in remembering of previous tasks, as can be seen in table \ref{tab:ablation-results}. 
+
+\begin{table}[tb]
+\caption{Effects of hypernetwork regularization on continual learning}
+\label{tab:ablation-results}
+\begin{center}
+\begin{tabular}{@{}lcc@{}}
+\toprule
+Algorithm & \texttt{HN-PPO+fc} & \texttt{HN-PPO+fc}, no regularization \\ 
+\midrule
+Accuracy               &  \textbf{0.73} $\pm$ 0.080 & 0.24 $\pm$ 0.038\\
+Forward transfer       &  0.04 $\pm$ 0.0054 & 0.03 $\pm$ 0.012\\
+Pos. backward transfer &  0.00 $\pm$ 0.00018& 0.00 $\pm$ 0.00\\
+Remembering            &  \textbf{1.00} $\pm$ 0.0044& 0.24 $\pm$ 0.076\\
+\bottomrule
+\end{tabular}
+\end{center}
+\end{table}
+
+Without regularization, the near-perfect remembering of previous tasks seen in \texttt{HN-PPO+fc} drops even below the PPO-finetuning baseline (cf. Tab. \ref{tab:cl-metrics-baselines}). This result confirms that while hypernetworks provide the model with the necessary capacity and flexibility, regularization of the hypernetwork outputs is mainly responsible for their high resilience against catastrophic forgetting.
+
+\section{Discussion}
+\as{Start with summarizing what you did, this paragraph comes as too abrupt.} 
+In our experiments, we have shown that our \texttt{HN-PPO} agent can successfully learn to open up to 5 different types of doors. While \citet{MBRLHypernetworks} have demonstrated that hypernetwork-based CL is able to consistently achieve high returns on multiple DoorGym tasks, our work shows that this capability also extends to fully solving the task at hand, i.e. opening the door. To this end, we chose to use the door opening success rate (cf. Section \ref{chap:metrics}) as the main performance indicator, in contrast to \citet{MBRLHypernetworks}, who report the average return as the core metric. We argue that in a scenario with a clear final goal, such as door opening, the success rate better represents the quality of a policy. The training time until a door can be reliably opened is however significantly longer than what \citet{MBRLHypernetworks} experimented with. In their experiments, agents were trained for 60.000 environment steps per task, while we trained for up to $2.4*10^7$ environment steps per task. 
+
+%\as{Part of this paragraph, specially the last sentences would go better in the discussion}. 
+The distinction between these 2 metrics is further motivated by our discovery that under certain circumstances, the evaluation return of the DoorGym environment is not representative of the ability of an agent to solve the task. Similar returns in the same environment can correspond to vastly different opening rates, as shown in Fig. \ref{fig:return_opening_rate}. While the three return curves follow a similar pattern, one agent is able to solve the task with a high opening rate, while the other 2 are unsuccessful.
+
+\begin{figure}[htbp]
+\begin{center}
+\includegraphics[width=1.0\linewidth]{images/return_opening_rate.png}
+\end{center}
+\caption{Return-opening rate mismatch: Evaluation return and opening rate curves of 3 experiments in the same environment (\texttt{HN-PPO}+fresh network, \texttt{lever} task).}
+\label{fig:return_opening_rate}
+\end{figure}
+
+Interestingly, the choice of the time point to end an agent's training on one task does sometimes greatly affect downstream tasks. Even when convergence is reached for key metrics (opening rate, average return), an agent might not be able to learn a following task when starting from one checkpoint, but succeed in doing so when starting from an earlier or later checkpoint. This hidden ability of a hypernetwork to learn further tasks may be of interest for further research. Avoiding states in which the learning of future tasks is hindered will help to further improve the capabilities of hypernetworks in CL.
+%\sa{Elaborate a bit more. The message is not completely clear here.}
+%\sa{Add plots for the returns as well, and discuss the finding about returns being good for all seeds but not the success rate. If possible, include an image or a link to a video showing the opening of doors.}
+%\jh{sounds very interesting}
+\section{Conclusions, Limitations and Outlook}
+\label{chap:conclusion}
+%\jh{\url{https://towardsdatascience.com/how-you-should-read-research-papers-according-to-andrew-ng-stanford-deep-learning-lectures-98ecbd3ccfb3} Andrew Ng suggests to read research papers in multiple passes; search for %"first pass" in the blog post: "In your first pass, start with reading the following sections within the paper: title, abstract and figures."
+%"The second pass entails you reading the following sections: introduction, conclusion, another pass through figures and scan through the rest of the content."}
+%\jh{So the introduction, conclusion, abstract and figure captions should be read without the text and provide insight. 
+%So I think you need describe a bit more what we're doing in the conclusion; for example, mention again what is learned in a continual way; (i.e. a policy that can then solve multiple tasks, and the continual learning is in %the tasks);}
+We presented \texttt{HN-PPO}, a novel approach to continual RL using PPO and a hypernetwork-based policy network. Using our method, the agent learns a policy for solving multiple tasks via a task-conditioned hypernetwork. New tasks can be trained in a continuous setting. The hypernetwork size is quasi-constant (except for a task embedding vector), which enables scaling to high numbers of tasks. In our experiments, we demonstrated that \texttt{HN-PPO} is a highly effective method to learn multiple tasks with complex dynamics, while offering strong protection against catastrophic forgetting. We compared two network architectures; a shared-parameters actor-critic using a hypernetwork, and an architecture with a non-hypernetwork critic. Further, our experiments show that regularization of the task-conditioned hypernetwork outputs is crucial for avoiding catastrophic forgetting. 
+
+While highly capable, \texttt{HN-PPO} suffers from training instability. Gradient explosions randomly occurred in some experiments, and an extremely small gradient norm of 0.0001 (cf. Tab. \ref{tab:hnppo-hparams}) was required to stabilize training to an acceptable level. The choice of random seed also greatly influences the training outcome, which is another indicator of said instability. Additionally, the choice of training stop point is also of importance for good performance downstream, however, it remains unclear how to find the optimal stopping point under this aspect. Considering these limitations, reducing training instability should be an objective of further research on this subject. Understanding the causes for the variability in downstream performance could also significantly aid our line of work. Finally, the current method requires long training times of up to 1 day per task, which makes experiments with very long task sequences unpractical. Attempting to optimize \texttt{HN-PPO}'s convergence behavior and computational efficiency may therefore be of interest as well.
+%\sa{Talking about the limitations is an important part of the paper. Please elaborate a bit more.}
+
+
+\bibliography{iclr2023_conference}
+\bibliographystyle{iclr2023_conference}
+
+\appendix
+\section{Appendix}
+\subsection{Experiment Details}
+\paragraph{HN-PPO Hyperparameters}
+Table \ref{tab:hnppo-hparams} lists the hyperparameters used for experiments with HN-PPO. $\beta$ and the task embedding dimension are specific to HN-PPO, the other were adapted from DoorGym's default values for PPO \citep{doorgym}. 
+
+\begin{table}[htbp]
+\caption{HN-PPO hyperparameters}
+\label{tab:hnppo-hparams}
+\begin{center}
+\begin{tabular}{@{}ll@{}}
+\toprule
+Name & Value \\ 
+\midrule
+Hypernetwork regularization $\beta$ (Eq. \ref{regloss})& 0.001 \\
+Task embedding dimension & 8 \\
+Learning rate & 0.005 \\
+Parallel rollouts & 8 \\
+PPO mini-batch size & 256 \\
+PPO clipping parameter $\epsilon$ (Eq. \ref{ppo-clip}) & 0.3 \\
+Max. gradient norm & 0.0001 \\
+Reward discount ratio $\gamma$ & 0.99\\
+GAE lambda & 0.95\\
+Entropy bonus coeff. $c_e$ (Eq. \ref{ppo-actorcritic}) & 0.01\\
+Value loss coeff. $c_v$ (Eq. \ref{ppo-actorcritic}) &  0.5\\
+\bottomrule
+\end{tabular}
+\end{center}
+\end{table}
+
+
+\paragraph{Network Architecture}
+\label{chap:architecture}
+For PPO, the default DoorGym network architecture was reused: Both actor and critic networks are modeled as MLPs with 2 hidden layers of 64 neurons each. $tanh$~was used as the activation function. The critic network has an output dimension of 1 (the scalar value of the action), the actor has an output dimension of 6 (each controlling an input to the 6-DoF \texttt{floatinghook} robot). During training, a stochastic policy is used, with actions sampled from a normal distribution parameterized by the actor's output (mean) and a learned standard deviation vector. In evaluation, actions are taken directly from the actor's output, making the policy deterministic.
+
+In HN-PPO, the target networks have the same architecture as laid out above for PPO. The hypernetwork controlling their weights is an MLP with 2 hidden layers of 640 \sa{or 64?} \ps{640 is correct, it's 10x the TN size} neurons each. In the hypernetwork, ReLU activation is used for the hidden layers. The output layer of the hypernetwork is a multi-head (blue in Fig. \ref{hnet-arch}) with no non-linearity applied. Each head represents one tensor containing parameters of the target network, with output dimensions chosen accordingly. For the actor shown in Fig. \ref{hnet-arch}, 7 heads are generated: a weight and bias tensor for each layer, plus an additional standard deviation vector for the Gaussian stochasticity layer. Accordingly, the shown critic network requires 6 heads to parameterize.\\
+For the "fresh critic" (\texttt{HN-PPO+fc}) architecture (cf. Section \ref{chap:freshcritic}), the critic is not parameterized by the hypernetwork, but is a stand-alone MLP. Accordingly, the number of output heads in the hypernetwork is reduced.
+
+\sa{I think this can be moved into the methods section.} \ps{Is here because it's one of the first things to go if I exceed the length. Will move depending on space requirements at the end}
+
+\begin{figure}[htbp]
+\begin{center}
+\includegraphics[width=0.8\linewidth]{images/hnet_arch.png}
+\end{center}
+\caption{Network architecture in HN-PPO.}
+\label{hnet-arch}
+\end{figure}
+
+\subsection{Supplementary Information}
+\paragraph{Accuracy Matrices}
+In this section, we show the train-test accuracy matrices, from which the CL metrics in Section \ref{chap:metrics} are calculated \citep{moreThanForgetting}. For each training setup, we show the element-wise average matrix of 3 experiments. Matrix entry $\emA_{i,j}$ represents the opening rate for an agent at the end of its training for task $i$, evaluated on task $j$. 
+
+\begin{itemize}
+\item PPO:
+\[\left[\begin{array}{cccccc}
+1.0& 0.21& 0.0& 0.0& 0.0& 0.0\\
+0.48& 1.0& 0.0& 0.0& 0.0& 0.03\\
+0.11& 0.01& 0.32& 0.0& 0.57& 0.0\\
+0.0& 0.29& 0.0& 0.32& 0.0& 0.62\\
+0.0& 0.01& 0.0& 0.0& 0.96& 0.0\\
+0.01& 0.01& 0.0& 0.0& 0.0& 0.63
+\end{array}\right]\]
+
+\item PPO-finetuning:
+\[\left[\begin{array}{cccccc}
+1.0& 0.21& 0.0& 0.0& 0.0& 0.0\\
+0.61& 1.0& 0.0& 0.0& 0.0& 0.0\\
+0.0& 0.24& 0.0& 0.0& 0.53& 0.0\\
+0.0& 0.01& 0.0& 0.0& 0.0& 0.68\\
+0.19& 0.06& 0.27& 0.0& 0.37& 0.0\\
+0.01& 0.05& 0.0& 0.0& 0.0& 0.36
+\end{array}\right]\]
+
+\item \texttt{HN-PPO}+fresh network
+\[\left[\begin{array}{cccccc}
+0.98 & 0.39 & 0.0 & 0.0 & 0.0 & 0.0 \\
+0.18 & 0.97 & 0.0 & 0.0 & 0.01 & 0.0 \\
+0.23 & 0.0 & 0.27 & 0.0 & 0.0 & 0.0 \\
+0.0 & 0.02 & 0.0 & 0.25 & 0.0 & 0.0 \\
+0.0 & 0.0 & 0.02 & 0.0 & 0.59 & 0.0 \\
+0.0 & 0.08 & 0.0 & 0.03 & 0.0 & 0.69\\
+\end{array}\right]\]
+
+\item \texttt{HN-PPO}
+\[\left[\begin{array}{cccccc}
+0.98 & 0.39 & 0.0  & 0.0  & 0.0  & 0.0\\
+0.99 & 1.0  & 0.0  & 0.0  & 0.0  & 0.0\\
+1.0  & 1.0  & 0.92 & 0.01 & 0.0  & 0.0\\
+0.99 & 1.0  & 0.93 & 0.31 & 0.0  & 0.39\\
+0.99 & 1.0  & 0.92 & 0.28 & 0.59 & 0.0\\
+0.99 & 0.99 & 0.92 & 0.27 & 0.57 & 0.36\\
+\end{array}\right]\]
+
+\item \texttt{HN-PPO+fc}:
+\[\left[\begin{array}{cccccc}
+1.0& 0.45& 0.0& 0.0& 0.01& 0.0\\
+1.0& 1.0& 0.0& 0.0& 0.0& 0.0\\
+1.0& 1.0& 0.69& 0.0& 0.0& 0.0\\
+1.0& 1.0& 0.69& 0.36& 0.0& 0.16\\
+1.0& 0.99& 0.7& 0.34& 0.25& 0.0\\
+1.0& 1.0& 0.68& 0.31& 0.25& 0.01
+\end{array}\right]\]
+
+\item \texttt{HN-PPO+fc}, no regularization:
+\[\left[\begin{array}{cccccc}
+1.0& 0.45& 0.0& 0.0& 0.01& 0.0\\
+0.66& 1.0& 0.0& 0.0& 0.0& 0.01\\
+0.33& 0.0& 0.44& 0.0& 0.0& 0.0\\
+0.0& 0.03& 0.0& 0.62& 0.0& 0.0\\
+0.0& 0.0& 0.0& 0.0& 0.83& 0.0\\
+0.0& 0.01& 0.0& 0.0& 0.0& 0.04
+\end{array}\right]\]
+\end{itemize}
+
+\paragraph{Code availability} The code used to run the experiments is available under \url{https://git.uibk.ac.at/csas8782/schoepf-bachelor-thesis}.
+\end{document}
