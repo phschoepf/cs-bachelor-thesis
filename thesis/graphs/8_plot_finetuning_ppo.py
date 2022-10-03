@@ -67,11 +67,14 @@ def get_plotdict(config):
 
 plot_dicts = [get_plotdict(c) for c in configs]
 
+TASK_LIM = 5  # plotting only some tasks to make an animated series for presentation
 
 #####plot the data
-fig, ax = plt.subplots(figsize=(10, 2.9))
+fig, ax = plt.subplots(figsize=(10, 2))
 for i, plot_dict in enumerate(plot_dicts):
     for j, (key, line) in enumerate(plot_dict.items()):
+        if j > TASK_LIM:
+            break
         line = list(zip(*line))
         ax.plot(line[0], line[1], ls=linestyle[i], c=f"C{j}", label=key.replace("_blue_floatinghook", "").replace("_fixed", ""))
     for start_value in range(1, len(configs[0]["runs"])):
@@ -79,18 +82,10 @@ for i, plot_dict in enumerate(plot_dicts):
     ax.set_xlim((0,len(configs[0]["runs"])))
     ax.set_ylim((-0.05, 1.05))
     ax.set_ylabel("Opening rate")
-    if i == 0:
-        l1 = ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.15),
-                  ncol=len(plot_dict), fancybox=True, shadow=True)
-        fig.add_artist(l1)
-# additional legend explaining different seeds
-seed_handles = [Line2D([0], [0], c='k', ls=linestyle[i], label=f"seed={s}") for i, s in enumerate([1,31415,27182])]
-ax.legend(handles=seed_handles, loc='upper center', bbox_to_anchor=(0.5, -0.35),
-        ncol=3, fancybox=True, shadow=True)
 ax.title.set_text(f"PPO-finetuning")
 ax.tick_params(axis='x', color='white')
 ax.set_xticks([i+0.5 for i in range(6)])
 ax.set_xticklabels([f"Task {i}" for i in range(6)])
 fig.tight_layout()
-fig.savefig(f"cl_timeseries_{os.path.splitext(os.path.basename(args.config[0]))[0]}.png", bbox_inches="tight")
+fig.savefig(f"cl_timeseries_{os.path.splitext(os.path.basename(args.config[0]))[0]}_{TASK_LIM}.png", bbox_inches="tight")
 print(f"processed {total_loads} data points")
