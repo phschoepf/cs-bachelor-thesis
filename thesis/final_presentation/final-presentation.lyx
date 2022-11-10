@@ -206,106 +206,6 @@ Do not forget old skills
 status open
 
 \begin_layout Plain Layout
-Hypernetworks
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_deeper
-\begin_layout Itemize
-Network that outputs a network
-\end_layout
-
-\begin_layout Itemize
-Task ID as input
-\end_layout
-
-\begin_layout Itemize
-Target networks determine policy/dynamics
-\end_layout
-
-\begin_layout Itemize
-Regularization on changes of outputs for old tasks
-\end_layout
-
-\end_deeper
-\begin_layout Frame
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-\begin_inset ERT
-status open
-
-\begin_layout Plain Layout
-
-
-\backslash
-[
-\backslash
-mathcal{L}_{reg} = 
-\backslash
-beta
-\backslash
-frac{1}{T-1}
-\backslash
-sum^T_{t=0} ||
-\backslash
-Theta_t - 
-\backslash
-Theta_{t,new}||_2
-\backslash
-]
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Frame
-\begin_inset Float figure
-wide false
-sideways false
-status open
-
-\begin_layout Plain Layout
-\align center
-\begin_inset Graphics
-	filename /home/philemon/Desktop/schoepf-bachelor-thesis/thesis/paper/images/hnet_arch.png
-	lyxscale 60
-	width 80col%
-
-\end_inset
-
-
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-\begin_inset Separator plain
-\end_inset
-
-
-\end_layout
-
-\begin_layout Frame
-\begin_inset Argument 4
-status open
-
-\begin_layout Plain Layout
 DoorGym
 \end_layout
 
@@ -468,6 +368,106 @@ end{column}
 status open
 
 \begin_layout Plain Layout
+Hypernetworks
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+Network that outputs a network
+\end_layout
+
+\begin_layout Itemize
+Task ID as input
+\end_layout
+
+\begin_layout Itemize
+Target networks determine policy/dynamics
+\end_layout
+
+\begin_layout Itemize
+Regularization on changes of outputs for old tasks
+\end_layout
+
+\end_deeper
+\begin_layout Frame
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+[
+\backslash
+mathcal{L}_{reg} = 
+\backslash
+beta
+\backslash
+frac{1}{T-1}
+\backslash
+sum^T_{t=0} ||
+\backslash
+Theta_t - 
+\backslash
+Theta_{t,new}||_2
+\backslash
+]
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Frame
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename /home/philemon/Desktop/schoepf-bachelor-thesis/thesis/paper/images/hnet_arch.png
+	lyxscale 60
+	width 80col%
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Separator plain
+\end_inset
+
+
+\end_layout
+
+\begin_layout Frame
+\begin_inset Argument 4
+status open
+
+\begin_layout Plain Layout
 HN-PPO protects against catastrophic forgetting
 \end_layout
 
@@ -527,39 +527,6 @@ status open
 \end_inset
 
 
-\end_layout
-
-\begin_layout Standard
-\begin_inset Separator plain
-\end_inset
-
-
-\end_layout
-
-\begin_layout Frame
-\begin_inset Argument 4
-status open
-
-\begin_layout Plain Layout
-HN-PPO protects against catastrophic forgetting
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Frame
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-1
-\end_layout
-
-\end_inset
-
-
 \begin_inset Float figure
 wide false
 sideways false
@@ -568,250 +535,7 @@ status open
 \begin_layout Plain Layout
 \align center
 \begin_inset Graphics
-	filename /home/philemon/Desktop/schoepf-bachelor-thesis/thesis/graphs/cl_timeseries_series8_config_1.png
-	lyxscale 60
-	width 85col%
-
-\end_inset
-
-
-\end_layout
-
-\end_inset
-
-
-\begin_inset Float figure
-wide false
-sideways false
-status open
-
-\begin_layout Plain Layout
-\align center
-\begin_inset Graphics
-	filename blank_series5.png
-	lyxscale 60
-	width 85col%
-
-\end_inset
-
-
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-\begin_inset Separator plain
-\end_inset
-
-
-\end_layout
-
-\begin_layout Frame
-\begin_inset Argument 4
-status open
-
-\begin_layout Plain Layout
-HN-PPO protects against catastrophic forgetting
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Frame
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-2
-\end_layout
-
-\end_inset
-
-
-\begin_inset Float figure
-wide false
-sideways false
-status open
-
-\begin_layout Plain Layout
-\align center
-\begin_inset Graphics
-	filename /home/philemon/Desktop/schoepf-bachelor-thesis/thesis/graphs/cl_timeseries_series8_config_2.png
-	lyxscale 60
-	width 85col%
-
-\end_inset
-
-
-\end_layout
-
-\end_inset
-
-
-\begin_inset Float figure
-wide false
-sideways false
-status open
-
-\begin_layout Plain Layout
-\align center
-\begin_inset Graphics
-	filename blank_series5.png
-	lyxscale 60
-	width 85col%
-
-\end_inset
-
-
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-\begin_inset Separator plain
-\end_inset
-
-
-\end_layout
-
-\begin_layout Frame
-\begin_inset Argument 4
-status open
-
-\begin_layout Plain Layout
-HN-PPO protects against catastrophic forgetting
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Frame
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-3
-\end_layout
-
-\end_inset
-
-
-\begin_inset Float figure
-wide false
-sideways false
-status open
-
-\begin_layout Plain Layout
-\align center
-\begin_inset Graphics
-	filename /home/philemon/Desktop/schoepf-bachelor-thesis/thesis/graphs/cl_timeseries_series8_config_3.png
-	lyxscale 60
-	width 85col%
-
-\end_inset
-
-
-\end_layout
-
-\end_inset
-
-
-\begin_inset Float figure
-wide false
-sideways false
-status open
-
-\begin_layout Plain Layout
-\align center
-\begin_inset Graphics
-	filename blank_series5.png
-	lyxscale 60
-	width 85col%
-
-\end_inset
-
-
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Frame
-
-\end_layout
-
-\begin_layout Standard
-\begin_inset Separator plain
-\end_inset
-
-
-\end_layout
-
-\begin_layout Frame
-\begin_inset Argument 4
-status open
-
-\begin_layout Plain Layout
-HN-PPO protects against catastrophic forgetting
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Frame
-\begin_inset Note Note
-status open
-
-\begin_layout Plain Layout
-4
-\end_layout
-
-\end_inset
-
-
-\begin_inset Float figure
-wide false
-sideways false
-status open
-
-\begin_layout Plain Layout
-\align center
-\begin_inset Graphics
-	filename /home/philemon/Desktop/schoepf-bachelor-thesis/thesis/graphs/cl_timeseries_series8_config_4.png
-	lyxscale 60
-	width 85col%
-
-\end_inset
-
-
-\end_layout
-
-\end_inset
-
-
-\begin_inset Float figure
-wide false
-sideways false
-status open
-
-\begin_layout Plain Layout
-\align center
-\begin_inset Graphics
-	filename blank_series5.png
+	filename /home/philemon/Desktop/schoepf-bachelor-thesis/thesis/graphs/cl_timeseries_legend_5.png
 	lyxscale 60
 	width 85col%
 
@@ -889,6 +613,26 @@ status open
 \align center
 \begin_inset Graphics
 	filename blank_series5.png
+	lyxscale 60
+	width 85col%
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename /home/philemon/Desktop/schoepf-bachelor-thesis/thesis/graphs/cl_timeseries_legend_5.png
 	lyxscale 60
 	width 85col%
 
@@ -986,6 +730,26 @@ status open
 \end_inset
 
 
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename /home/philemon/Desktop/schoepf-bachelor-thesis/thesis/graphs/cl_timeseries_legend_5.png
+	lyxscale 60
+	width 85col%
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -1048,6 +812,26 @@ status open
 \align center
 \begin_inset Graphics
 	filename /home/philemon/Desktop/schoepf-bachelor-thesis/thesis/graphs/cl_timeseries_series5_config_5.png
+	lyxscale 60
+	width 85col%
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset Float figure
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename /home/philemon/Desktop/schoepf-bachelor-thesis/thesis/graphs/cl_timeseries_legend_5.png
 	lyxscale 60
 	width 85col%
 
@@ -1203,193 +987,6 @@ Remembering
 
 \begin_layout Plain Layout
 
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-\begin_inset Separator plain
-\end_inset
-
-
-\end_layout
-
-\begin_layout Frame
-\begin_inset Argument 4
-status open
-
-\begin_layout Plain Layout
-HN regularization is required for CL performance
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Frame
-\begin_inset Float figure
-wide false
-sideways false
-status open
-
-\begin_layout Plain Layout
-\align center
-\begin_inset Graphics
-	filename /home/philemon/Desktop/schoepf-bachelor-thesis/thesis/graphs/cl_timeseries_series4_config_0.png
-	lyxscale 60
-	width 85col%
-
-\end_inset
-
-
-\end_layout
-
-\end_inset
-
-
-\begin_inset Float figure
-wide false
-sideways false
-status open
-
-\begin_layout Plain Layout
-\align center
-\begin_inset Graphics
-	filename /home/philemon/Desktop/schoepf-bachelor-thesis/thesis/graphs/cl_timeseries_series9_config_0.png
-	lyxscale 60
-	width 85col%
-
-\end_inset
-
-
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-\begin_inset Separator plain
-\end_inset
-
-
-\end_layout
-
-\begin_layout Frame
-\begin_inset Argument 4
-status open
-
-\begin_layout Plain Layout
-HN regularization is required for CL performance
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Frame
-\begin_inset Float figure
-wide false
-sideways false
-status open
-
-\begin_layout Plain Layout
-\align center
-\begin_inset Graphics
-	filename /home/philemon/Desktop/schoepf-bachelor-thesis/thesis/graphs/cl_timeseries_series4_config_5.png
-	lyxscale 60
-	width 85col%
-
-\end_inset
-
-
-\end_layout
-
-\end_inset
-
-
-\begin_inset Float figure
-wide false
-sideways false
-status open
-
-\begin_layout Plain Layout
-\align center
-\begin_inset Graphics
-	filename /home/philemon/Desktop/schoepf-bachelor-thesis/thesis/graphs/cl_timeseries_series9_config_5.png
-	lyxscale 60
-	width 85col%
-
-\end_inset
-
-
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-\begin_inset Separator plain
-\end_inset
-
-
-\end_layout
-
-\begin_layout Frame
-\begin_inset Argument 4
-status open
-
-\begin_layout Plain Layout
-Conclusion
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_deeper
-\begin_layout Itemize
-HN-PPO is very effective against catastrophic forgetting
-\end_layout
-
-\begin_layout Itemize
-Single-task success rate comparable to PPO
-\end_layout
-
-\begin_layout Itemize
-Regularization crucial for HN-PPO's CL capability
-\end_layout
-
-\begin_layout Itemize
-Limitations
-\end_layout
-
-\begin_deeper
-\begin_layout Itemize
-Seed dependence
-\end_layout
-
-\begin_layout Itemize
-Previous task checkpoint dependence
-\end_layout
-
-\end_deeper
-\end_deeper
-\begin_layout Frame
-\begin_inset Note Note
-status open
-
-\begin_layout Itemize
-add table of results at end
 \end_layout
 
 \end_inset
