@@ -1,6 +1,6 @@
 [submodule "DoorGym"]
 	path = DoorGym
-	url = https://git.uibk.ac.at/csas8782/DoorGym.git
+	url = https://github.com/phschoepf/DoorGym
 [submodule "baselines"]
 	path = baselines
 	url = https://github.com/openai/baselines.git
